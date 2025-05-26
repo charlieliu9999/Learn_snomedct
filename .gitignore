@@ -1,0 +1,7 @@
+# Ignore sensitive files and directories
+.env
+.env copy.example
+__pycache__/
+logs/
+uploads/
+history_records/
