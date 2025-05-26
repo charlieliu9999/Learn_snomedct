@@ -1,0 +1,703 @@
+.enhanced-heading {
+    position: relative;
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    color: #2c5282;
+}
+
+.enhanced-heading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #4a90e2, #5e60ce);
+    border-radius: 2px;
+}
+
+.info-card {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    border-left: 5px solid #4a90e2;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.info-card p {
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.enhanced-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+}
+
+.enhanced-list li {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.enhanced-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #4a90e2;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.feature-item {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.feature-item h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.feature-item p {
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.feature-icon {
+    margin-bottom: 1rem;
+    color: #4a90e2;
+    font-size: 2.5rem;
+}
+
+/* 工作流程图样式 */
+.workflow-wrapper {
+    margin: 2rem 0;
+    overflow-x: auto;
+}
+
+.workflow-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 600px;
+}
+
+.workflow-demo {
+    margin: 2rem 0;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.workflow-steps {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 2rem 0;
+}
+
+.workflow-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.workflow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 2rem;
+    right: -2rem;
+    width: 4rem;
+    height: 2px;
+    background-color: #e2e8f0;
+}
+
+.workflow-step.active .step-number {
+    background-color: #4a90e2;
+    color: #fff;
+}
+
+.workflow-step.active .step-name {
+    color: #4a90e2;
+    font-weight: 600;
+}
+
+.workflow-step .step-number {
+    width: 4rem;
+    height: 4rem;
+    line-height: 4rem;
+    border-radius: 50%;
+    background-color: #e2e8f0;
+    margin: 0 auto 1rem;
+    color: #4a5568;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.workflow-step .step-name {
+    font-size: 1rem;
+    color: #4a5568;
+    transition: all 0.3s ease;
+}
+
+.workflow-screen {
+    display: none;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 1.5rem;
+}
+
+.workflow-screen.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.workflow-screen h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.workflow-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.workflow-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.workflow-btn:hover {
+    background-color: #3a7bc8;
+}
+
+.workflow-btn:disabled {
+    background-color: #cbd5e0;
+    cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 交互式案例演示样式 */
+.demo-tabs {
+    margin: 2rem 0;
+}
+
+.tab-buttons {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #4a5568;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    color: #4a90e2;
+}
+
+.tab-button.active {
+    color: #4a90e2;
+    border-bottom-color: #4a90e2;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.case-intro {
+    margin-bottom: 1.5rem;
+}
+
+.report-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.original-report, .structured-report {
+    flex: 1;
+    min-width: 300px;
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.report-text p, .structure-section p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.structure-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.structure-section:last-child {
+    border-bottom: none;
+}
+
+.structure-section h5 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.structure-item {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.item-label {
+    flex: 0 0 120px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.item-value {
+    flex: 1;
+}
+
+.snomedTerm {
+    color: #3182ce;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
+.snomedTerm:hover {
+    color: #2b6cb0;
+}
+
+.snomedTerm.active {
+    background-color: #ebf4ff;
+    font-weight: 500;
+}
+
+.code-view {
+    flex: 1 0 100%;
+    background-color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.code-prompt {
+    color: #718096;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.concept-info {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.concept-info.hidden {
+    display: none;
+}
+
+.concept-basic {
+    margin-bottom: 1.5rem;
+}
+
+.concept-id, .concept-term {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.concept-relationships h5 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.detailConceptRelations {
+    list-style: none;
+    padding: 0;
+}
+
+.detailConceptRelations li {
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.detailConceptRelations li::before {
+    content: '•';
+    position: absolute;
+    left: 0.5rem;
+    color: #4a90e2;
+}
+
+/* 概念详情展示卡片 */
+.concept-details {
+    margin-top: 2rem;
+    background-color: #f0f7ff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #3182ce;
+}
+
+.concept-details h4 {
+    margin-top: 0;
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.concept-info {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.concept-id, .concept-term, .concept-type {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.concept-expression-container {
+    margin-top: 1.5rem;
+}
+
+.concept-expression-container h5 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #2d3748;
+}
+
+.concept-expression {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .report-demo {
+        flex-direction: column;
+    }
+    
+    .workflow-steps {
+        flex-direction: column;
+    }
+    
+    .workflow-step:not(:last-child)::after {
+        top: auto;
+        right: auto;
+        bottom: -1rem;
+        left: 2rem;
+        width: 2px;
+        height: 2rem;
+    }
+}
+
+/* Styles for the 17-step workflow in report-structuring.html */
+.workflow-report-structuring {
+    list-style-type: none; /* Remove default ol numbering */
+    counter-reset: workflow-counter; /* Initialize custom counter */
+    padding: 0;
+    margin: 20px 0;
+    display: grid;
+    /* Adjust minmax item width and repeat count as needed for 17 items */
+    /* e.g., for 4-5 items per row: */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+    gap: 25px; /* Space between items */
+}
+
+.workflow-report-structuring li {
+    position: relative;
+    padding: 20px;
+    padding-left: 60px; /* Space for the custom number circle */
+    background-color: #ffffff; /* White background for cards */
+    border: 1px solid #dce1e6; /* Lighter border */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06); /* Softer shadow */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.workflow-report-structuring li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.workflow-report-structuring li::before {
+    counter-increment: workflow-counter;
+    content: counter(workflow-counter);
+    position: absolute;
+    left: 20px; /* Position of the number circle */
+    top: 20px;  /* Align to the top with card's padding-top */
+    background-color: #0056b3; /* Darker blue for numbers */
+    color: white;
+    width: 36px; /* Slightly larger circle */
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    box-shadow: 0 2px 4px rgba(0, 86, 179, 0.25);
+}
+
+.workflow-report-structuring li .workflow-step-content h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #0056b3; /* Theme color for headings */
+    font-size: 1.15em;
+    font-weight: 600; /* Bolder headings */
+}
+
+.workflow-report-structuring li .workflow-step-content p,
+.workflow-report-structuring li .workflow-step-content ul {
+    font-size: 0.95em; /* Slightly larger text for readability */
+    color: #333d47; /* Darker grey for text */
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.workflow-report-structuring li .workflow-step-content ul {
+    padding-left: 20px;
+    margin-top: 8px;
+}
+
+.workflow-report-structuring li .workflow-step-content ul li {
+    padding: 2px 0; /* Adjust sub-list item padding */
+    padding-left: 0; /* Reset padding-left for sub-items */
+    margin-bottom: 4px; /* Space between sub-items */
+    background-color: transparent; /* Sub-items don't need card background */
+    border: none; /* No border for sub-items */
+    box-shadow: none; /* No shadow for sub-items */
+}
+
+.workflow-report-structuring li .workflow-step-content ul li:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Remove ::before pseudo-element for sub-list items if they are also <li> */
+.workflow-report-structuring li .workflow-step-content ul li::before {
+    display: none;
+}
+
+@media (max-width: 576px) { /* 针对宽度小于等于576px的屏幕 */
+    .workflow-report-structuring {
+        grid-template-columns: 1fr; /* 单列显示 */
+        gap: 15px; /* 减小卡片间的垂直间距 */
+    }
+
+    .workflow-report-structuring li {
+        padding: 15px; /* 统一内边距 */
+        padding-left: 55px; /* 为左侧的数字编号留出空间 */
+    }
+
+    .workflow-report-structuring li::before {
+        width: 32px; /* 略微调整数字圆圈大小 */
+        height: 32px;
+        font-size: 1em; /* 调整数字字体大小 */
+        left: 15px; /* 调整数字位置 */
+        top: 15px; /* Align to the top for small screens */
+    }
+
+    .workflow-report-structuring li .workflow-step-content h3 {
+        font-size: 1.1em; /* 调整标题字体 */
+    }
+
+    .workflow-report-structuring li .workflow-step-content p,
+    .workflow-report-structuring li .workflow-step-content ul {
+        font-size: 0.9em; /* 调整正文字体 */
+    }
+}
+
+/* Logo styles - vertical layout for Chinese text */
+
+.logo {
+    display: block;
+    text-align: left;
+}
+
+.logo h1 {
+    margin: 0;
+    line-height: 1.0;
+    font-size: 2em;
+    white-space: nowrap;
+}
+
+.logo p {
+    margin: 5px 0 0 0;
+    white-space: nowrap;
+    font-size: 1.2em;
+    color: #666;
+}
+
+/* Hero section - vertical layout with consistent width */
+.hero .container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 1200px; /* 调整为与页面主体内容相同的宽度 */
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.hero-content {
+    padding-right: 0;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 1200px; /* 与容器宽度一致 */
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 1200px; /* 与容器宽度一致 */
+    height: auto;
+}
+
+.hero-buttons {
+    justify-content: center;
+    margin-top: 30px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .hero-content,
+    .hero-image {
+        max-width: 100%;
+    }
+    
+    .hero .container {
+        padding: 0 15px;
+    }
+}
+
+/* 专家意见栏样式优化 */
+.testimonials {
+    padding: 40px 0; /* 保留上下padding */
+    background-color: #f8fafc; /* 保留背景色 */
+}
+
+.testimonials .container {
+    width: 100%; /* 确保container占满父容器宽度 */
+    max-width: 1200px; /* 保留最大宽度 */
+    margin: 0 auto; /* 居中 */
+    padding: 0; /* 移除左右padding，交给inner flex容器处理 */
+}
+
+.testimonial-slider {
+    display: flex;
+    flex-wrap: nowrap; /* 防止换行，强制卡片在同一行 */
+    gap: 20px; /* 设置卡片之间的间隙 */
+    padding: 0 20px; /* 在slider两侧添加padding，与container的padding相抵消 */
+}
+
+.testimonial-slide {
+    flex: 0 0 calc(33.333% - 20px); /* 每个卡片宽度为1/3减去gap */
+    background: #ffffff; /* 白色背景 */
+    border-radius: 8px; /* 圆角 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 阴影 */
+    padding: 25px; /* 卡片内边距 */
+    /* 移除之前的float和width/margin-right */
+}
+
+.testimonial-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial-content p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #2d3748;
+    margin-bottom: 20px;
+}
+
+.testimonial-author {
+    margin-top: auto;
+}
+
+.testimonial-author h4 {
+    color: #2c5282;
+    margin-bottom: 5px;
+}
+
+.testimonial-author p {
+    color: #718096;
+    font-size: 0.9em;
+    margin: 0;
+}

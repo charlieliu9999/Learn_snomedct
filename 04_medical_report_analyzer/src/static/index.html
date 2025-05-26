@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医学影像报告SNOMED CT结构化分析系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-activity me-2"></i>医学影像报告SNOMED CT结构化分析系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="history-link">历史记录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="about-link">关于系统</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 主页内容 -->
+        <div id="home-page">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-file-earmark-text me-2"></i>医学影像报告输入
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="report-form">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="age" class="form-label">患者年龄</label>
+                                        <input type="number" class="form-control" id="age" name="age" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gender" class="form-label">患者性别</label>
+                                        <select class="form-select" id="gender" name="gender" required>
+                                            <option value="" selected disabled>请选择</option>
+                                            <option value="男">男</option>
+                                            <option value="女">女</option>
+                                            <option value="其他">其他</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="examination_type" class="form-label">检查项目</label>
+                                    <input type="text" class="form-control" id="examination_type" name="examination_type" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="findings" class="form-label">影像所见</label>
+                                    <textarea class="form-control" id="findings" name="findings" rows="5" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="impression" class="form-label">诊断意见</label>
+                                    <textarea class="form-control" id="impression" name="impression" rows="3" required></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-2"></i>分析报告
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-diagram-3 me-2"></i>SNOMED CT结构化结果
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="loading" class="text-center d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">正在分析中，请稍候...</p>
+                            </div>
+                            <div id="result-container" class="d-none">
+                                <ul class="nav nav-tabs" id="resultTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="findings-tab" data-bs-toggle="tab" data-bs-target="#findings-result" type="button" role="tab">影像所见分析</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="impression-tab" data-bs-toggle="tab" data-bs-target="#impression-result" type="button" role="tab">诊断意见分析</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="visualization-tab" data-bs-toggle="tab" data-bs-target="#visualization" type="button" role="tab">关系可视化</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="resultTabsContent">
+                                    <div class="tab-pane fade show active" id="findings-result" role="tabpanel">
+                                        <h6>识别的实体：</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover" id="findings-entities-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>原文</th>
+                                                        <th>实体类型</th>
+                                                        <th>SNOMED编码</th>
+                                                        <th>SNOMED术语</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                        <h6 class="mt-3">识别的关系：</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover" id="findings-relationships-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>源实体</th>
+                                                        <th>关系类型</th>
+                                                        <th>目标实体</th>
+                                                        <th>SNOMED关系编码</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="impression-result" role="tabpanel">
+                                        <h6>识别的实体：</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover" id="impression-entities-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>原文</th>
+                                                        <th>实体类型</th>
+                                                        <th>SNOMED编码</th>
+                                                        <th>SNOMED术语</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                        <h6 class="mt-3">识别的关系：</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover" id="impression-relationships-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>源实体</th>
+                                                        <th>关系类型</th>
+                                                        <th>目标实体</th>
+                                                        <th>SNOMED关系编码</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="visualization" role="tabpanel">
+                                        <div class="text-center">
+                                            <div id="graph-container" style="height: 400px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="empty-result" class="text-center">
+                                <i class="bi bi-file-earmark-medical" style="font-size: 4rem; color: #dee2e6;"></i>
+                                <p class="text-muted mt-2">请输入医学影像报告并点击"分析报告"按钮</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录页面 -->
+        <div id="history-page" class="d-none">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>历史分析记录
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="history-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>患者信息</th>
+                                    <th>检查项目</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="history-loading" class="text-center d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">加载历史记录中...</p>
+                    </div>
+                    <div id="history-empty" class="text-center d-none">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-2">暂无历史记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于系统页面 -->
+        <div id="about-page" class="d-none">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>关于系统
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4>医学影像报告SNOMED CT结构化分析系统</h4>
+                    <p>本系统旨在帮助医疗专业人员将医学影像报告文本转换为结构化的SNOMED CT术语表示，便于数据分析和医疗决策支持。</p>
+                    
+                    <h5>主要功能</h5>
+                    <ul>
+                        <li>医学影像报告文本输入与处理</li>
+                        <li>基于大模型的SNOMED CT术语解析</li>
+                        <li>医学实体与关系的识别与编码</li>
+                        <li>结构化结果的可视化展示</li>
+                        <li>历史记录的保存与查询</li>
+                    </ul>
+                    
+                    <h5>技术实现</h5>
+                    <p>本系统采用Flask作为后端框架，结合现代化的前端技术，实现了一个完整的医学影像报告结构化分析平台。系统利用大模型技术进行医学文本的语义理解，并将识别的实体和关系映射到SNOMED CT标准术语体系。</p>
+                    
+                    <h5>使用说明</h5>
+                    <ol>
+                        <li>在首页输入患者基本信息、检查项目、影像所见和诊断意见</li>
+                        <li>点击"分析报告"按钮，系统将自动进行SNOMED CT结构化分析</li>
+                        <li>在结果页面查看识别的实体、关系及其SNOMED CT编码</li>
+                        <li>可通过"历史记录"页面查看和管理之前的分析结果</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="text-muted mb-0">医学影像报告SNOMED CT结构化分析系统 &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/visualization.js"></script>
+</body>
+</html>

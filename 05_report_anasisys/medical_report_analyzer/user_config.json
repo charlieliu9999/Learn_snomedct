@@ -1,0 +1,10 @@
+{
+  "llm_config": {
+    "provider": "ollama",
+    "model": "qwen2.5:14b",
+    "api_key": "nokey",
+    "api_base": "http://localhost:11434",
+    "temperature": 0.2,
+    "max_tokens": 2000
+  }
+}

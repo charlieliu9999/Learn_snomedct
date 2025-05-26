@@ -1,0 +1,9 @@
+{
+  "feature_diagnosis_pairs": [],
+  "probability_model": {},
+  "diagnostic_guidelines": {},
+  "bidirectional_templates": {
+    "error": "JSON解析失败",
+    "text": "【错误：未设置API密钥】"
+  }
+}

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式案例演示 - SNOMED CT医学影像应用</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles-additional.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>RIMAGAI</h1>
+                <p>医学影像与诊断报告结构化</p>
+            </div>
+            <nav>
+                <button class="mobile-menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="snomed-intro.html">SNOMED CT介绍</a></li>
+                    <li><a href="imaging-application.html">医学影像应用</a></li>
+                    <li><a href="report-structuring.html">报告结构化</a></li>
+                    <li><a href="case-demo.html" class="active">交互式案例</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>交互式案例演示</h1>
+            <p>体验SNOMED CT在医学影像诊断报告结构化中的实际应用</p>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="container">
+            <div class="content-block">
+                <h2>交互式报告结构化体验</h2>
+                <p>通过以下交互式演示，您可以体验如何将传统自由文本的放射学报告转换为基于SNOMED CT的结构化格式。您可以看到每个临床发现是如何被标准化编码的，以及结构化后的数据如何被计算机系统理解和利用。</p>
+                
+                <div class="demo-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="chest-ct">胸部CT报告</button>
+                        <button class="tab-button" data-tab="brain-mri">脑部MRI报告</button>
+                        <button class="tab-button" data-tab="abdominal-us">腹部超声报告</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="chest-ct">
+                        <div class="case-intro">
+                            <h3>案例1: 胸部CT报告结构化</h3>
+                            <p>本案例展示了一份胸部CT肺结节随访报告的结构化过程。请点击报告中的关键发现，查看其SNOMED CT编码。</p>
+                        </div>
+                        
+                        <div class="report-demo">
+                            <div class="original-report">
+                                <h4>原始自由文本报告</h4>
+                                <div class="report-text" id="chestOriginalReport">
+                                    <p><strong>检查：</strong>胸部低剂量CT平扫</p>
+                                    <p><strong>临床信息：</strong>肺结节随访</p>
+                                    <p><strong>技术参数：</strong>螺旋CT，层厚1mm，间隔0.8mm，管电压120kV，自动管电流调节</p>
+                                    <p><strong>检查结果：</strong></p>
+                                    <p>右上肺可见一枚类圆形结节，大小约8mm×7mm，边缘略呈毛刺状，CT值约45HU，较3个月前（6mm×5mm）略有增大。</p>
+                                    <p>右下肺见一枚磨玻璃样结节，直径约5mm，边界清晰，与3个月前大小无明显变化。</p>
+                                    <p>双肺未见其他明显异常密度影。纵隔内未见明显肿大淋巴结。心脏、主动脉形态及大小未见明显异常。</p>
+                                    <p><strong>结论：</strong></p>
+                                    <p>1. 右上肺实性结节，较前增大，考虑恶性可能性大，建议进一步PET-CT检查评估和肺科会诊。</p>
+                                    <p>2. 右下肺磨玻璃样结节，考虑炎性或早期病变，建议3个月后复查胸部CT。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="structured-report">
+                                <h4>结构化报告视图</h4>
+                                <div class="report-structure" id="chestStructuredReport">
+                                    <div class="structure-section">
+                                        <h5>检查信息</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">检查类型:</div>
+                                            <div class="item-value snomedTerm" data-concept="395081000119108" data-term="低剂量胸部CT">低剂量胸部CT</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">临床原因:</div>
+                                            <div class="item-value snomedTerm" data-concept="390834004" data-term="肺结节随访">肺结节随访</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>结节 #1</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">结节类型:</div>
+                                            <div class="item-value snomedTerm" data-concept="87049006" data-term="实性肺结节">实性肺结节</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">位置:</div>
+                                            <div class="item-value snomedTerm" data-concept="48387007" data-term="右上肺">右上肺</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">形态:</div>
+                                            <div class="item-value snomedTerm" data-concept="58779008" data-term="类圆形">类圆形</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">大小:</div>
+                                            <div class="item-value snomedTerm" data-concept="404499006" data-term="大小测量">8mm×7mm</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">边缘特征:</div>
+                                            <div class="item-value snomedTerm" data-concept="26241001" data-term="毛刺状">毛刺状</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">CT值:</div>
+                                            <div class="item-value snomedTerm" data-concept="251474001" data-term="Hounsfield单位测量">45HU</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">变化情况:</div>
+                                            <div class="item-value snomedTerm" data-concept="385392005" data-term="增大">较3个月前（6mm×5mm）略有增大</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>结节 #2</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">结节类型:</div>
+                                            <div class="item-value snomedTerm" data-concept="53341011000001103" data-term="磨玻璃样结节">磨玻璃样结节</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">位置:</div>
+                                            <div class="item-value snomedTerm" data-concept="41224006" data-term="右下肺">右下肺</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">大小:</div>
+                                            <div class="item-value snomedTerm" data-concept="404499006" data-term="大小测量">直径约5mm</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">边缘特征:</div>
+                                            <div class="item-value snomedTerm" data-concept="73735007" data-term="边界清晰">边界清晰</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">变化情况:</div>
+                                            <div class="item-value snomedTerm" data-concept="399307001" data-term="无变化">与3个月前大小无明显变化</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>其他所见</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">肺组织:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">双肺未见其他明显异常密度影</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">淋巴结:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">未见明显肿大淋巴结</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">心血管:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">心脏、主动脉形态及大小未见明显异常</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>诊断与建议</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">结节 #1:</div>
+                                            <div class="item-value snomedTerm" data-concept="372124000" data-term="恶性肺结节">右上肺实性结节，较前增大，考虑恶性</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">建议 #1:</div>
+                                            <div class="item-value snomedTerm" data-concept="434271000124104" data-term="PET-CT评估">建议进一步PET-CT检查评估和肺科会诊</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">结节 #2:</div>
+                                            <div class="item-value snomedTerm" data-concept="447886005" data-term="炎性肺结节">右下肺磨玻璃样结节，考虑炎性或早期病变</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">建议 #2:</div>
+                                            <div class="item-value snomedTerm" data-concept="275881004" data-term="随访检查">建议3个月后复查胸部CT</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 添加概念详情区域 -->
+                        <div class="concept-details">
+                            <h4>SNOMED CT 概念详情</h4>
+                            <p class="code-prompt">点击上方报告中的蓝色术语查看其SNOMED CT编码详情</p>
+                            <div class="concept-info">
+                                <div class="concept-basic">
+                                    <div class="concept-id"><strong>概念ID：</strong><span id="conceptId">-</span></div>
+                                    <div class="concept-term"><strong>首选术语：</strong><span id="conceptTerm">-</span></div>
+                                    <div class="concept-type"><strong>语义类型：</strong><span id="conceptType">-</span></div>
+                                </div>
+                                <div class="concept-expression-container">
+                                    <h5>概念表达式</h5>
+                                    <pre class="concept-expression" id="conceptExpression">// 点击术语查看其SNOMED CT表达式</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="brain-mri">
+                        <div class="case-intro">
+                            <h3>案例2: 脑部MRI报告结构化</h3>
+                            <p>本案例展示了一份脑部MRI脑胶质瘤检查报告的结构化过程。请点击报告中的关键发现，查看其SNOMED CT编码。</p>
+                        </div>
+                        
+                        <div class="report-demo">
+                            <div class="original-report">
+                                <h4>原始自由文本报告</h4>
+                                <div class="report-text" id="brainOriginalReport">
+                                    <p><strong>检查：</strong>脑部MRI增强扫描</p>
+                                    <p><strong>临床信息：</strong>反复头痛、短暂记忆障碍3个月，疑似脑肿瘤</p>
+                                    <p><strong>技术参数：</strong>1.5T MRI，T1WI、T2WI、FLAIR、DWI、增强扫描序列</p>
+                                    <p><strong>检查结果：</strong></p>
+                                    <p>右侧颞叶见一不规则异常信号病灶，大小约4.2cm×3.8cm×3.5cm。T1WI呈低信号，T2WI及FLAIR呈高信号，DWI显示部分弥散受限。边界不清晰，周围可见明显水肿带。</p>
+                                    <p>增强扫描显示病灶不均匀强化，内部可见斑片状未强化区，考虑为坏死区域。</p>
+                                    <p>病灶向右侧侧脑室前角局部压迫，但无明显中线结构移位。脑室系统大小正常。</p>
+                                    <p>幕上及幕下其他脑实质未见明显异常信号。脑膜未见明显异常强化。</p>
+                                    <p><strong>结论：</strong></p>
+                                    <p>右侧颞叶不规则异常信号病灶，边界不清，不均匀强化，符合高级别胶质瘤影像表现，考虑胶质母细胞瘤可能性大，建议神经外科会诊并考虑立体定向活检明确诊断。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="structured-report">
+                                <h4>结构化报告视图</h4>
+                                <div class="report-structure" id="brainStructuredReport">
+                                    <div class="structure-section">
+                                        <h5>检查信息</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">检查类型:</div>
+                                            <div class="item-value snomedTerm" data-concept="429858000" data-term="脑部MRI增强扫描">脑部MRI增强扫描</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">临床原因:</div>
+                                            <div class="item-value snomedTerm" data-concept="446534005" data-term="疑似脑肿瘤">疑似脑肿瘤</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">症状表现:</div>
+                                            <div class="item-value snomedTerm" data-concept="25064002" data-term="头痛">反复头痛、短暂记忆障碍3个月</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>主要发现</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">病灶性质:</div>
+                                            <div class="item-value snomedTerm" data-concept="68453008" data-term="脑肿瘤">异常信号病灶</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">位置:</div>
+                                            <div class="item-value snomedTerm" data-concept="78277001" data-term="右侧颞叶结构">右侧颞叶</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">形态:</div>
+                                            <div class="item-value snomedTerm" data-concept="107649004" data-term="不规则形状">不规则形状</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">大小:</div>
+                                            <div class="item-value snomedTerm" data-concept="404499006" data-term="大小测量">4.2cm×3.8cm×3.5cm</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">T1WI信号:</div>
+                                            <div class="item-value snomedTerm" data-concept="720519008" data-term="T1低信号强度">T1WI呈低信号</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">T2WI信号:</div>
+                                            <div class="item-value snomedTerm" data-concept="720520002" data-term="T2高信号强度">T2WI及FLAIR呈高信号</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">弥散特征:</div>
+                                            <div class="item-value snomedTerm" data-concept="719192009" data-term="弥散受限">DWI显示部分弥散受限</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">边界特征:</div>
+                                            <div class="item-value snomedTerm" data-concept="4831001" data-term="边界不清晰">边界不清晰</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">水肿:</div>
+                                            <div class="item-value snomedTerm" data-concept="127559005" data-term="脑水肿">周围可见明显水肿带</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>增强特征</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">强化方式:</div>
+                                            <div class="item-value snomedTerm" data-concept="255493007" data-term="不均匀强化">不均匀强化</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">坏死情况:</div>
+                                            <div class="item-value snomedTerm" data-concept="6574001" data-term="肿瘤坏死">内部可见斑片状未强化区，考虑为坏死区域</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>影响与并发症</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">压迫情况:</div>
+                                            <div class="item-value snomedTerm" data-concept="129582009" data-term="结构压迫">向右侧侧脑室前角局部压迫</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">中线移位:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">无明显中线结构移位</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">脑室系统:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">脑室系统大小正常</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>其他所见</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">其他脑实质:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">幕上及幕下其他脑实质未见明显异常信号</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">脑膜:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">脑膜未见明显异常强化</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>诊断与建议</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">诊断:</div>
+                                            <div class="item-value snomedTerm" data-concept="393564001" data-term="胶质母细胞瘤">高级别胶质瘤，考虑胶质母细胞瘤可能性大</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">建议:</div>
+                                            <div class="item-value snomedTerm" data-concept="432879008" data-term="立体定向活检">建议神经外科会诊并考虑立体定向活检明确诊断</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 添加概念详情区域 -->
+                        <div class="concept-details">
+                            <h4>SNOMED CT 概念详情</h4>
+                            <p class="code-prompt">点击上方报告中的蓝色术语查看其SNOMED CT编码详情</p>
+                            <div class="concept-info">
+                                <div class="concept-basic">
+                                    <div class="concept-id"><strong>概念ID：</strong><span id="conceptId">-</span></div>
+                                    <div class="concept-term"><strong>首选术语：</strong><span id="conceptTerm">-</span></div>
+                                    <div class="concept-type"><strong>语义类型：</strong><span id="conceptType">-</span></div>
+                                </div>
+                                <div class="concept-expression-container">
+                                    <h5>概念表达式</h5>
+                                    <pre class="concept-expression" id="conceptExpression">// 点击术语查看其SNOMED CT表达式</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="abdominal-us">
+                        <div class="case-intro">
+                            <h3>案例3: 腹部超声报告结构化</h3>
+                            <p>本案例展示了一份腹部超声检查报告的结构化过程。请点击报告中的关键发现，查看其SNOMED CT编码。</p>
+                        </div>
+                        
+                        <div class="report-demo">
+                            <div class="original-report">
+                                <h4>原始自由文本报告</h4>
+                                <div class="report-text" id="abdominalOriginalReport">
+                                    <p><strong>检查：</strong>腹部超声检查</p>
+                                    <p><strong>临床信息：</strong>右上腹不适3周，加重2天</p>
+                                    <p><strong>检查结果：</strong></p>
+                                    <p><strong>肝脏：</strong>肝脏大小正常，轮廓规则，实质回声均匀，未见异常病灶。肝内胆管未见扩张。</p>
+                                    <p><strong>胆囊：</strong>胆囊大小正常，壁厚度正常，内可见多个强回声团块，最大者约1.5cm，伴声影，随体位改变而移动。</p>
+                                    <p><strong>胰腺：</strong>胰腺大小正常，轮廓规则，回声均匀，未见明显异常回声。胰管未见扩张。</p>
+                                    <p><strong>脾脏：</strong>脾脏大小正常，轮廓规则，回声均匀，未见异常病灶。</p>
+                                    <p><strong>肾脏：</strong>双肾大小正常，轮廓规则，皮髓质分界清晰，实质回声均匀，未见异常病灶。集合系统未见扩张。</p>
+                                    <p><strong>主要血管：</strong>腹主动脉、下腔静脉显示清晰，走行通畅，未见明显异常。</p>
+                                    <p><strong>腹腔未见明显积液。</strong></p>
+                                    <p><strong>结论：</strong></p>
+                                    <p>多发胆囊结石，建议外科会诊，结合患者症状考虑治疗方案。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="structured-report">
+                                <h4>结构化报告视图</h4>
+                                <div class="report-structure" id="abdominalStructuredReport">
+                                    <div class="structure-section">
+                                        <h5>检查信息</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">检查类型:</div>
+                                            <div class="item-value snomedTerm" data-concept="16310003" data-term="腹部超声检查">腹部超声检查</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">临床原因:</div>
+                                            <div class="item-value snomedTerm" data-concept="21522001" data-term="腹部不适">右上腹不适3周，加重2天</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>肝脏</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">大小:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">正常</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">轮廓:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">规则</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">实质回声:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">均匀，未见异常病灶</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">胆管:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">未见扩张</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>胆囊</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">大小:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">正常</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">壁厚度:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">正常</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">内部结构:</div>
+                                            <div class="item-value snomedTerm" data-concept="235571004" data-term="胆囊结石">可见多个强回声团块，最大者约1.5cm，伴声影，随体位改变而移动</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>其他器官</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">胰腺:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">大小正常，轮廓规则，回声均匀，未见明显异常回声</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">胰管:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">未见扩张</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">脾脏:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">大小正常，轮廓规则，回声均匀，未见异常病灶</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">肾脏:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">双肾大小正常，轮廓规则，皮髓质分界清晰，实质回声均匀</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">集合系统:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">未见扩张</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">主要血管:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">腹主动脉、下腔静脉显示清晰，走行通畅，未见明显异常</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">腹腔积液:</div>
+                                            <div class="item-value snomedTerm" data-concept="17621005" data-term="正常发现">未见明显积液</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="structure-section">
+                                        <h5>诊断与建议</h5>
+                                        <div class="structure-item">
+                                            <div class="item-label">诊断:</div>
+                                            <div class="item-value snomedTerm" data-concept="235571004" data-term="胆囊结石">多发胆囊结石</div>
+                                        </div>
+                                        <div class="structure-item">
+                                            <div class="item-label">建议:</div>
+                                            <div class="item-value snomedTerm" data-concept="3457005" data-term="患者转诊">建议外科会诊，结合患者症状考虑治疗方案</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 添加概念详情区域 -->
+                        <div class="concept-details">
+                            <h4>SNOMED CT 概念详情</h4>
+                            <p class="code-prompt">点击上方报告中的蓝色术语查看其SNOMED CT编码详情</p>
+                            <div class="concept-info">
+                                <div class="concept-basic">
+                                    <div class="concept-id"><strong>概念ID：</strong><span id="conceptId">-</span></div>
+                                    <div class="concept-term"><strong>首选术语：</strong><span id="conceptTerm">-</span></div>
+                                    <div class="concept-type"><strong>语义类型：</strong><span id="conceptType">-</span></div>
+                                </div>
+                                <div class="concept-expression-container">
+                                    <h5>概念表达式</h5>
+                                    <pre class="concept-expression" id="conceptExpression">// 点击术语查看其SNOMED CT表达式</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-block" id="workflow-demo">
+                <h2>结构化报告工作流程演示</h2>
+                <p>以下是一个交互式演示，展示医学影像诊断报告从采集到结构化的完整工作流程。通过点击下方按钮可以逐步查看流程的每个环节。</p>
+                
+                <div class="workflow-demo">
+                    <ul class="workflow-steps">
+                        <li class="workflow-step active">
+                            <div class="step-number">1</div>
+                            <div class="step-name">影像采集</div>
+                        </li>
+                        <li class="workflow-step">
+                            <div class="step-number">2</div>
+                            <div class="step-name">初步分析</div>
+                        </li>
+                        <li class="workflow-step">
+                            <div class="step-number">3</div>
+                            <div class="step-name">结构化录入</div>
+                        </li>
+                        <li class="workflow-step">
+                            <div class="step-number">4</div>
+                            <div class="step-name">SNOMED编码</div>
+                        </li>
+                        <li class="workflow-step">
+                            <div class="step-number">5</div>
+                            <div class="step-name">存储与共享</div>
+                        </li>
+                        <li class="workflow-step">
+                            <div class="step-number">6</div>
+                            <div class="step-name">临床应用</div>
+                        </li>
+                    </ul>
+                    
+                    <div class="workflow-container">
+                        <div class="workflow-screen active">
+                            <h4>1. 医学影像采集</h4>
+                            <div class="workflow-description">
+                                <p>工作流程首先从医学影像设备(如CT、MRI、超声等)进行检查，并将原始影像数据传输到PACS(医学影像存档与通信系统)。这些原始数据包含DICOM头信息，其中一些信息如检查类型和部位已可用于后续的结构化。</p>
+                            </div>
+                            <div class="workflow-image">
+                                <img src="images/storage.jpg" alt="医学影像采集" class="workflow-img">
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-screen">
+                            <h4>2. 放射科医师初步分析</h4>
+                            <div class="workflow-description">
+                                <p>放射科医师访问PACS系统，查看患者的影像学检查，进行专业分析和初步诊断。传统上，医师会口述或键入自由文本形式的报告，这种格式虽然灵活但缺乏标准化。</p>
+                            </div>
+                            <div class="workflow-image">
+                                <img src="images/reporting.jpg" alt="影像分析与诊断" class="workflow-img">
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-screen">
+                            <h4>3. 使用结构化模板录入</h4>
+                            <div class="workflow-description">
+                                <p>医师使用针对特定检查类型的结构化报告模板，将发现记录为预定义的数据元素，而不是自由文本。这种模板式录入确保了报告的完整性和一致性，且不会遗漏关键信息。</p>
+                            </div>
+                            <div class="workflow-image">
+                                <img src="images/nlp.jpg" alt="结构化模板录入" class="workflow-img">
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-screen">
+                            <h4>4. SNOMED CT自动编码</h4>
+                            <div class="workflow-description">
+                                <p>系统自动将录入的结构化数据映射到对应的SNOMED CT概念，为每个临床发现分配唯一的概念ID。对于自由文本部分，可以使用自然语言处理(NLP)技术提取关键概念并映射到SNOMED CT。</p>
+                            </div>
+                            <div class="workflow-image">
+                                <img src="images/mapping.jpg" alt="SNOMED CT编码" class="workflow-img">
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-screen">
+                            <h4>5. 标准化存储与共享</h4>
+                            <div class="workflow-description">
+                                <p>编码后的结构化报告以标准格式(如HL7 CDA或FHIR)存储，并可安全地跨系统和机构共享。这种标准化格式使得数据可以被各种临床系统理解和处理，而不仅仅是放射信息系统(RIS)。</p>
+                            </div>
+                            <div class="workflow-image">
+                                <img src="images/architecture.jpg" alt="标准化存储与共享" class="workflow-img">
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-screen">
+                            <h4>6. 临床应用与二次利用</h4>
+                            <div class="workflow-description">
+                                <p>最终，结构化的报告数据可以被医疗机构的各种临床系统利用，从电子病历和临床决策支持系统到医学研究和质量改进项目。结构化数据还可以用于训练人工智能模型，进一步提升医学影像诊断的准确性和效率。</p>
+                            </div>
+                            <div class="workflow-image">
+                                <img src="images/confirmation.jpg" alt="临床应用与二次利用" class="workflow-img">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-controls">
+                        <button id="prevFrame" class="workflow-btn" disabled>上一步</button>
+                        <button id="nextFrame" class="workflow-btn">下一步</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>RIMAGAI</h2>
+                    <p>医学影像与诊断报告结构化</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h3>核心资源</h3>
+                        <ul>
+                            <li><a href="https://www.snomed.org/" target="_blank">SNOMED International</a></li>
+                            <li><a href="https://browser.ihtsdotools.org/" target="_blank">SNOMED CT浏览器</a></li>
+                            <li><a href="https://confluence.ihtsdotools.org/display/DOCSTART" target="_blank">官方文档</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h3>医学影像资源</h3>
+                        <ul>
+                            <li><a href="https://www.rsna.org/" target="_blank">北美放射学会 (RSNA)</a></li>
+                            <li><a href="https://www.acr.org/" target="_blank">美国放射学院 (ACR)</a></li>
+                            <li><a href="https://www.dicomstandard.org/" target="_blank">DICOM标准</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 SNOMED CT医学影像应用与诊断报告结构化 | 本站内容仅用于教育目的</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/demo.js"></script>
+    <script src="js/enhanced.js"></script>
+</body>
+</html>

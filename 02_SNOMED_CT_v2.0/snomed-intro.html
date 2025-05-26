@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNOMED CT介绍 - 医学影像与诊断报告结构化</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles-additional.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>RIMAGAI</h1>
+                <p>医学影像与诊断报告结构化</p>
+            </div>
+            <nav>
+                <button class="mobile-menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="snomed-intro.html" class="active">SNOMED CT介绍</a></li>
+                    <li><a href="imaging-application.html">医学影像应用</a></li>
+                    <li><a href="report-structuring.html">报告结构化</a></li>
+                    <li><a href="case-demo.html">交互式案例</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>SNOMED CT介绍</h1>
+            <p>全球最全面的医学术语标准集合</p>
+        </div>
+    </section>
+
+    <div class="two-column-layout">
+        <aside class="page-nav">
+            <h3>本页导航</h3>
+            <ul>
+                <li><a href="#what-is-snomed" class="active">什么是SNOMED CT</a></li>
+                <li><a href="#core-components">核心组件</a></li>
+                <li><a href="#hierarchy">层次结构</a></li>
+                <li><a href="#coding-principle">编码原理</a></li>
+                <li><a href="#advantages">SNOMED CT优势</a></li>
+                <li><a href="#applications">应用领域</a></li>
+            </ul>
+        </aside>
+
+        <section class="content-section">
+            <div class="container">
+                <div class="content-block" id="what-is-snomed">
+                    <h2>什么是SNOMED CT?</h2>
+                    <p>SNOMED CT (系统性医学术语集 - 临床术语) 是一个全面的、多语言的临床医疗保健术语集。它由SNOMED International开发和维护，目前已被全球40多个国家作为国家级术语标准采用。</p>
+                    <p>SNOMED CT提供了一个标准化的方式来表示临床信息，使得不同医疗系统之间可以无缝交换数据，并保持其临床含义的一致性。</p>
+                    
+                    <div class="info-box">
+                        <h3>SNOMED CT官方资源</h3>
+                        <ul>
+                            <li><strong>官方网站</strong>: <a href="https://www.snomed.org/" target="_blank">SNOMED International</a></li>
+                            <li><strong>术语浏览器</strong>: <a href="https://browser.ihtsdotools.org/" target="_blank">SNOMED CT浏览器</a></li>
+                            <li><strong>实施指南</strong>: <a href="https://confluence.ihtsdotools.org/display/DOCSTART" target="_blank">SNOMED CT文档库</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-block" id="core-components">
+                    <h2>SNOMED CT的核心组件</h2>
+                    <p>SNOMED CT由以下核心组件构成，共同形成一个复杂而强大的医学概念体系：</p>
+                    
+                    <div class="component-cards">
+                        <div class="component-card">
+                            <h3>概念 (Concepts)</h3>
+                            <p>SNOMED CT包含超过35万个活跃概念，每个概念都有唯一的数字标识符，代表临床思想的最小单位。例如：</p>
+                            <ul>
+                                <li>22298006 | 心肌梗死 |</li>
+                                <li>371564000 | 胸部X线检查 |</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="component-card">
+                            <h3>描述 (Descriptions)</h3>
+                            <p>为概念提供人类可读的术语。一个概念可以有多个描述，包括：</p>
+                            <ul>
+                                <li><strong>完全指定名称 (FSN)</strong>: 准确唯一的定义</li>
+                                <li><strong>优选术语 (PT)</strong>: 常用临床表达</li>
+                                <li><strong>同义词</strong>: 其他临床表达方式</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="component-card">
+                            <h3>关系 (Relationships)</h3>
+                            <p>将概念连接成语义网络，定义概念间的逻辑关系：</p>
+                            <ul>
+                                <li><strong>IS-A关系</strong>: 建立概念层次结构</li>
+                                <li><strong>属性关系</strong>: 如"发病部位"、"临床发现"等</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-block" id="hierarchy">
+                    <h2>SNOMED CT层次结构</h2>
+                    <p>SNOMED CT的概念组织在一个多层次分类体系中，主要顶级类别包括：</p>
+                    
+                    <div class="hierarchy-container">
+                        <ul class="hierarchy-tree">
+                            <li>
+                                <span class="tree-item">临床发现 (Clinical finding)</span>
+                                <ul>
+                                    <li><span class="tree-item">疾病 (Disease)</span></li>
+                                    <li><span class="tree-item">症状和体征 (Symptom and sign)</span></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span class="tree-item">操作 (Procedure)</span>
+                                <ul>
+                                    <li><span class="tree-item">诊断操作 (Diagnostic procedure)</span>
+                                        <ul>
+                                            <li><span class="tree-item">成像操作 (Imaging procedure)</span></li>
+                                        </ul>
+                                    </li>
+                                    <li><span class="tree-item">治疗操作 (Therapeutic procedure)</span></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span class="tree-item">身体结构 (Body structure)</span>
+                            </li>
+                            <li>
+                                <span class="tree-item">物质 (Substance)</span>
+                            </li>
+                            <li>
+                                <span class="tree-item">环境或地理位置 (Environment or geographical location)</span>
+                            </li>
+                            <li>
+                                <span class="tree-item">社会背景 (Social context)</span>
+                            </li>
+                            <li>
+                                <span class="tree-item">观察值 (Observable entity)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="image-box">
+                        <img src="images/snomed-ontology.jpg" alt="SNOMED CT本体结构" class="content-image">
+                        <p class="image-caption">SNOMED CT本体结构与概念间关系示意图</p>
+                    </div>
+                </div>
+
+                <div class="content-block" id="coding-principle">
+                    <h2>SNOMED CT编码原理</h2>
+                    <p>SNOMED CT使用基于描述逻辑的表达方式，通过组合概念和关系来描述复杂的临床信息。</p>
+                    
+                    <div class="coding-example">
+                        <h3>简单概念编码示例</h3>
+                        <pre>
+临床发现: 右侧肺下叶的肺炎 
+SNOMED CT编码: 
+  53084003 |肺炎|
+    363698007 |发病部位| = 82998004 |肺下叶结构|
+    272741003 |侧向性| = 24028007 |右侧|</pre>
+                    </div>
+
+                    <p>这种表达式允许系统精确理解"右侧肺下叶的肺炎"的解剖位置和临床含义，而不仅仅是将其视为一个简单的文本字符串。</p>
+                    
+                    <div class="info-box warning">
+                        <h3>重要提示: 后组合</h3>
+                        <p>SNOMED CT支持"后组合"(Post-coordination)，允许通过组合多个概念创建新的复杂表达式，即使这些特定组合在SNOMED CT中没有预定义的概念代码。这极大地增强了SNOMED CT表达复杂临床场景的能力。</p>
+                    </div>
+                </div>
+
+                <div class="content-block" id="advantages">
+                    <h2>SNOMED CT的核心优势</h2>
+                    <p>SNOMED CT作为全球领先的临床术语标准，具有多方面的优势：</p>
+                    
+                    <div class="advantages-grid">
+                        <div class="advantage-item">
+                            <h3>综合性</h3>
+                            <p>SNOMED CT包含超过35万个医学概念，涵盖了临床医学的几乎所有领域，从疾病和诊断到治疗和手术，从解剖结构到医疗设备。</p>
+                        </div>
+                        
+                        <div class="advantage-item">
+                            <h3>多语言支持</h3>
+                            <p>SNOMED CT支持多种语言版本，包括英语、西班牙语、法语、丹麦语、荷兰语、瑞典语以及简体中文等，确保全球范围内的术语一致性。</p>
+                        </div>
+                        
+                        <div class="advantage-item">
+                            <h3>语义互操作性</h3>
+                            <p>通过使用统一编码的医学概念和关系，SNOMED CT确保不同医疗机构和系统之间的临床数据可以保持其语义完整性。</p>
+                        </div>
+                        
+                        <div class="advantage-item">
+                            <h3>结构化表达</h3>
+                            <p>SNOMED CT的逻辑结构允许复杂临床概念的结构化表达，支持自动处理和推理，为决策支持系统提供基础。</p>
+                        </div>
+                        
+                        <div class="advantage-item">
+                            <h3>与其他标准的映射</h3>
+                            <p>SNOMED CT提供与其他医学编码系统（如ICD-10, LOINC, ICF等）的映射，促进不同标准之间的兼容和转换。</p>
+                        </div>
+                        
+                        <div class="advantage-item">
+                            <h3>持续更新和维护</h3>
+                            <p>SNOMED International每六个月发布一次更新，确保术语集跟上医学知识和技术的发展。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-block" id="applications">
+                    <h2>SNOMED CT的应用领域</h2>
+                    <p>SNOMED CT在医疗信息化的多个领域有广泛应用：</p>
+                    
+                    <div class="applications-detail">
+                        <div class="application-area">
+                            <h3>电子病历系统 (EHR)</h3>
+                            <p>SNOMED CT用于标准化记录患者问题列表、临床发现、诊断、手术和治疗等核心临床数据。</p>
+                            <ul>
+                                <li>问题列表和诊断编码</li>
+                                <li>临床笔记结构化</li>
+                                <li>用药和过敏记录</li>
+                                <li>家族史编码</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-area">
+                            <h3>医学影像与放射学</h3>
+                            <p>在放射学领域，SNOMED CT用于标准化影像检查类型、解剖部位、影像所见和诊断。</p>
+                            <ul>
+                                <li>检查请求标准化</li>
+                                <li>报告发现编码</li>
+                                <li>与DICOM标准集成</li>
+                                <li>结构化报告产生</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-area">
+                            <h3>临床决策支持系统</h3>
+                            <p>基于SNOMED CT编码的临床数据可被决策支持系统用于提供医疗建议和警报。</p>
+                            <ul>
+                                <li>疾病风险预测</li>
+                                <li>临床指南遵循提醒</li>
+                                <li>药物相互作用警报</li>
+                                <li>预防性护理建议</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-area">
+                            <h3>医疗数据分析与研究</h3>
+                            <p>SNOMED CT支持大规模医疗数据集的标准化，便于研究和分析。</p>
+                            <ul>
+                                <li>流行病学研究</li>
+                                <li>临床试验患者筛选</li>
+                                <li>真实世界数据分析</li>
+                                <li>健康结果研究</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-area">
+                            <h3>健康信息交换</h3>
+                            <p>SNOMED CT是区域和国家健康信息交换平台的核心术语标准。</p>
+                            <ul>
+                                <li>患者摘要文档</li>
+                                <li>转诊信息交换</li>
+                                <li>跨机构病历共享</li>
+                                <li>国家健康数据存储库</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-area">
+                            <h3>人工智能与机器学习</h3>
+                            <p>SNOMED CT编码的标准化数据是训练和验证医疗AI模型的宝贵资源。</p>
+                            <ul>
+                                <li>自然语言处理训练</li>
+                                <li>诊断辅助AI</li>
+                                <li>影像识别算法</li>
+                                <li>预测性分析模型</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>RIMAGAI</h2>
+                    <p>医学影像与诊断报告结构化</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h3>核心资源</h3>
+                        <ul>
+                            <li><a href="https://www.snomed.org/" target="_blank">SNOMED International</a></li>
+                            <li><a href="https://browser.ihtsdotools.org/" target="_blank">SNOMED CT浏览器</a></li>
+                            <li><a href="https://confluence.ihtsdotools.org/display/DOCSTART" target="_blank">官方文档</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h3>医学影像资源</h3>
+                        <ul>
+                            <li><a href="https://www.rsna.org/" target="_blank">北美放射学会 (RSNA)</a></li>
+                            <li><a href="https://www.acr.org/" target="_blank">美国放射学院 (ACR)</a></li>
+                            <li><a href="https://www.dicomstandard.org/" target="_blank">DICOM标准</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 SNOMED CT医学影像应用与诊断报告结构化 | 本站内容仅用于教育目的</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/enhanced.js"></script>
+</body>
+</html>
