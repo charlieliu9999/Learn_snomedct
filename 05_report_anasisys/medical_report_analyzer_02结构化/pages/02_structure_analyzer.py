@@ -56,6 +56,28 @@ if not st.session_state.get("data_loaded", False):
 data = st.session_state.processed_data if st.session_state.processed_data is not None else st.session_state.raw_data
 total_reports = len(data)
 
+# 获取用户选择的字段名，设置默认值以保持兼容性
+findings_column = st.session_state.get("findings_col", "影像表现")
+impression_column = st.session_state.get("impression_col", "诊断结论")
+
+# 检查字段是否存在，如果不存在则尝试自动检测或提示用户
+if findings_column not in data.columns or impression_column not in data.columns:
+    st.error(f"⚠️ 所选字段不存在于当前数据中")
+    st.markdown(f"**当前选择的字段:**")
+    st.markdown(f"- 影像表现字段: `{findings_column}`")
+    st.markdown(f"- 诊断结论字段: `{impression_column}`")
+    st.markdown(f"**数据中可用的字段:** {', '.join(data.columns)}")
+    
+    if st.button("返回数据探索页面重新选择字段"):
+        st.switch_page("pages/01_data_explorer.py")
+    st.stop()
+
+# 显示当前使用的字段信息
+st.sidebar.markdown("### 📋 当前分析字段")
+st.sidebar.info(f"影像表现: **{findings_column}**\n\n诊断结论: **{impression_column}**")
+if st.sidebar.button("🔧 修改字段选择"):
+    st.switch_page("pages/01_data_explorer.py")
+
 # 统一分页/单份逻辑
 analysis_mode = st.sidebar.radio("分析模式", ["单份报告分析", "批量报告分析"])
 if analysis_mode == "单份报告分析":
@@ -76,17 +98,17 @@ report = data.iloc[current_idx]
 st.markdown("#### 原始报告")
 col1, col2 = st.columns(2)
 with col1:
-    st.text_area("影像表现", report.get("影像表现", ""), height=120, disabled=True, key=f"img_{current_idx}")
+    st.text_area(f"{findings_column}", report.get(findings_column, ""), height=120, disabled=True, key=f"img_{current_idx}")
 with col2:
-    st.text_area("诊断结论", report.get("诊断结论", ""), height=120, disabled=True, key=f"diag_{current_idx}")
+    st.text_area(f"{impression_column}", report.get(impression_column, ""), height=120, disabled=True, key=f"diag_{current_idx}")
 
 # 单份分析
 if st.button("分析当前报告", key=f"analyze_{current_idx}"):
     with st.spinner("正在分析..."):
         extractor = st.session_state.structure_extractor
-        # 确保报告包含必要字段
-        image_text = report.get("影像表现", "") if pd.notna(report.get("影像表现", "")) else ""
-        diagnosis_text = report.get("诊断结论", "") if pd.notna(report.get("诊断结论", "")) else ""
+        # 使用动态字段名获取内容
+        image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
+        diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
         result = extractor.analyze_single_report(image_text, diagnosis_text)
         st.session_state.analyzed_reports[f"report_{current_idx}"] = result
         st.success("结构化分析完成！")
@@ -207,8 +229,8 @@ if analysis_mode == "批量报告分析":
             for idx, i in enumerate(indices):
                 if f"report_{i}" not in st.session_state.analyzed_reports:
                     rpt = data.iloc[i]
-                    image_text = rpt.get("影像表现", "") if pd.notna(rpt.get("影像表现", "")) else ""
-                    diagnosis_text = rpt.get("诊断结论", "") if pd.notna(rpt.get("诊断结论", "")) else ""
+                    image_text = rpt.get(findings_column, "") if pd.notna(rpt.get(findings_column, "")) else ""
+                    diagnosis_text = rpt.get(impression_column, "") if pd.notna(rpt.get(impression_column, "")) else ""
                     result = extractor.analyze_single_report(image_text, diagnosis_text)
                     st.session_state.analyzed_reports[f"report_{i}"] = result
                 progress_bar.progress((idx + 1) / total_count)
