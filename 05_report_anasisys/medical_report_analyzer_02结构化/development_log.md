@@ -1,5 +1,90 @@
 # 开发日志
 
+## 2025-06-04T12:48:28+00:00
+
+### 已完成工作：动态字段支持优化
+
+1. **核心问题解决**：
+   - 修复了数据浏览和统计分析中硬编码字段名的问题
+   - 实现了完全基于用户选择字段的动态分析系统
+   - 解决了用户反馈的"当选择impressing和finding字段后，系统应该针对这些字段进行分析"的需求
+
+2. **数据浏览优化**：
+   - **智能默认列选择**：优先使用用户指定的关键字段作为默认显示列
+   - **动态列选择逻辑**：如果用户选择了findings_col和impression_col，则自动将这些字段设为默认
+   - **后备机制**：如果没有用户指定字段，则使用前两列作为默认
+
+3. **统计分析功能增强**：
+   - **extract_basic_stats函数优化**：添加impression_col参数，支持动态诊断字段
+   - **智能字段检测**：优先使用用户指定字段，否则自动检测常见字段名
+   - **诊断分布分析**：基于用户选择的实际字段进行统计，而非硬编码的"诊断结论"
+   - **字段名显示**：在统计图表中显示实际使用的字段名
+
+4. **报告详细分析优化**：
+   - **动态字段标题**：使用用户选择的实际字段名作为分析标题
+   - **条件检查更新**：基于用户选择的字段进行存在性检查
+   - **内容显示优化**：所有文本显示都使用用户选择的字段内容
+
+5. **全面测试验证**：
+   - **创建专门测试脚本**：test_dynamic_fields.py，验证动态字段功能
+   - **多场景测试**：英文字段(impressing/finding)、中文字段(影像所见/诊断意见)
+   - **自动检测测试**：验证系统能正确检测标准和非标准字段名
+   - **数据浏览测试**：确认默认列选择逻辑正确工作
+
+6. **测试数据生成**：
+   - **test_data_english_fields.xlsx**：包含impressing和finding字段的英文测试数据
+   - **test_data_chinese_fields.xlsx**：包含影像所见和诊断意见字段的中文测试数据
+   - **50条记录**：足够的数据量用于统计分析验证
+
+7. **代码质量提升**：
+   - **函数参数优化**：extract_basic_stats增加可选的impression_col参数
+   - **向后兼容性**：保持原有API的兼容性，新参数为可选
+   - **错误处理**：增强字段不存在时的处理逻辑
+   - **代码复用**：统一字段检测和处理逻辑
+
+### 技术实现细节：
+
+1. **数据浏览默认列选择逻辑**：
+```python
+default_columns = []
+if st.session_state.get("findings_col") and st.session_state.findings_col in data_to_display.columns:
+    default_columns.append(st.session_state.findings_col)
+if st.session_state.get("impression_col") and st.session_state.impression_col in data_to_display.columns:
+    default_columns.append(st.session_state.impression_col)
+```
+
+2. **动态统计分析**：
+```python
+impression_col_for_stats = st.session_state.get("impression_col")
+stats = extract_basic_stats(data_to_display, impression_col=impression_col_for_stats)
+```
+
+3. **智能字段检测增强**：
+```python
+def extract_basic_stats(df, impression_col=None):
+    diagnosis_column = impression_col
+    if not diagnosis_column or diagnosis_column not in df.columns:
+        potential_columns = ['诊断结论', 'impression', 'conclusion', 'diagnosis']
+        for col in potential_columns:
+            if col in df.columns:
+                diagnosis_column = col
+                break
+```
+
+### 测试结果：
+- ✅ 英文字段(impressing/finding)处理：通过
+- ✅ 中文字段(影像所见/诊断意见)处理：通过  
+- ✅ 自动字段检测功能：通过
+- ✅ 数据浏览默认列选择：通过
+- ✅ 统计分析动态字段：通过
+- ✅ 诊断分布图字段名显示：通过
+
+### 用户体验改进：
+- 🎯 **精准字段分析**：所有分析都基于用户实际选择的字段
+- 📊 **智能默认显示**：数据浏览自动显示用户关心的关键字段
+- 🏷️ **清晰字段标识**：统计图表明确显示使用的字段名
+- 🔄 **一致性体验**：从数据浏览到详细分析，全程使用用户选择的字段
+
 ## 2025-06-04T12:30:18+00:00
 
 ### 已完成工作：数据统计和可视化增强功能

@@ -431,10 +431,21 @@ else:
     # 数据列选择器
     st.markdown("### 🔍 数据浏览")
     
+    # 智能默认选择：优先使用用户指定的关键字段
+    default_columns = []
+    if st.session_state.get("findings_col") and st.session_state.findings_col in data_to_display.columns:
+        default_columns.append(st.session_state.findings_col)
+    if st.session_state.get("impression_col") and st.session_state.impression_col in data_to_display.columns:
+        default_columns.append(st.session_state.impression_col)
+    
+    # 如果没有用户指定的字段，或者字段不存在，则使用前两列作为默认
+    if not default_columns:
+        default_columns = list(data_to_display.columns[:2]) if len(data_to_display.columns) >= 2 else list(data_to_display.columns)
+    
     column_selector = st.multiselect(
         "选择要查看的列",
         options=list(data_to_display.columns),
-        default=["影像表现", "诊断结论"] if "影像表现" in data_to_display.columns and "诊断结论" in data_to_display.columns else list(data_to_display.columns[:2])
+        default=default_columns
     )
     
     if column_selector:
@@ -445,7 +456,9 @@ else:
     
     # 基本统计信息
     with st.expander("查看基本统计信息", expanded=True):
-        stats = extract_basic_stats(data_to_display)
+        # 传递用户选择的诊断结论字段给统计函数
+        impression_col_for_stats = st.session_state.get("impression_col") if st.session_state.get("impression_col") else None
+        stats = extract_basic_stats(data_to_display, impression_col=impression_col_for_stats)
         
         # 创建三列布局显示核心指标
         metric_col1, metric_col2, metric_col3 = st.columns(3)
@@ -462,14 +475,18 @@ else:
         
         # 如果有诊断分布信息，显示诊断分布图
         if '前10位诊断分布' in stats:
-            st.write("主要诊断分布:")
+            # 显示实际使用的字段名
+            diagnosis_field_name = stats.get('诊断字段', '诊断结论')
+            st.write(f"主要诊断分布 (基于字段: **{diagnosis_field_name}**):")
+            
             # 创建诊断分布图
             diagnosis_data = stats['前10位诊断分布']
             labels = list(diagnosis_data.keys())
             sizes = list(diagnosis_data.values())
             
             # 使用我们的绘图工具创建饼图
-            fig, ax = create_pie_chart(sizes, labels, title='主要诊断分布')
+            chart_title = f'{diagnosis_field_name} - 主要诊断分布'
+            fig, ax = create_pie_chart(sizes, labels, title=chart_title)
             st.pyplot(fig)
     
     # 详细字段分析
@@ -625,8 +642,9 @@ else:
             
             st.dataframe(pd.DataFrame(outlier_data), use_container_width=True)
     
-    # 影像表现和诊断结论详细分析
-    if "影像表现" in data_to_display.columns and "诊断结论" in data_to_display.columns:
+    # 基于用户选择字段的详细分析
+    if st.session_state.get("findings_col") and st.session_state.get("impression_col") and \
+       st.session_state.findings_col in data_to_display.columns and st.session_state.impression_col in data_to_display.columns:
         st.markdown("### 📑 报告详细分析")
         
         sample_idx = st.slider("选择报告样本索引", 0, len(data_to_display) - 1, 0)
@@ -636,13 +654,13 @@ else:
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("#### 影像表现")
+            st.markdown(f"#### {st.session_state.findings_col}")
             
-            if pd.notna(sample_report["影像表现"]):
-                st.write(sample_report["影像表现"])
+            if pd.notna(sample_report[st.session_state.findings_col]):
+                st.write(sample_report[st.session_state.findings_col])
                 
                 # 尝试分解报告
-                sections = get_report_sections(sample_report["影像表现"])
+                sections = get_report_sections(sample_report[st.session_state.findings_col])
                 
                 if len(sections) > 1:  # 如果成功分解为多个部分
                     st.markdown("##### 分解后的结构")
@@ -650,23 +668,23 @@ else:
                         with st.expander(section_name):
                             st.write(content)
             else:
-                st.write("无影像表现数据")
+                st.write(f"无{st.session_state.findings_col}数据")
         
         with col2:
-            st.markdown("#### 诊断结论")
+            st.markdown(f"#### {st.session_state.impression_col}")
             
-            if pd.notna(sample_report["诊断结论"]):
-                st.write(sample_report["诊断结论"])
+            if pd.notna(sample_report[st.session_state.impression_col]):
+                st.write(sample_report[st.session_state.impression_col])
                 
                 # 简单处理诊断结论
-                diagnoses = sample_report["诊断结论"].split("。")
+                diagnoses = sample_report[st.session_state.impression_col].split("。")
                 if len(diagnoses) > 1:
                     st.markdown("##### 分解后的诊断")
                     for i, diag in enumerate(diagnoses):
                         if diag.strip():
                             st.write(f"{i+1}. {diag.strip()}")
             else:
-                st.write("无诊断结论数据")
+                st.write(f"无{st.session_state.impression_col}数据")
     
     # 进一步分析的链接
     st.markdown("---")

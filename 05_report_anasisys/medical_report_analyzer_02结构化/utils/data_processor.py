@@ -131,12 +131,13 @@ def get_report_sections(text: str) -> Dict[str, str]:
     
     return sections
 
-def extract_basic_stats(df: pd.DataFrame) -> Dict[str, Any]:
+def extract_basic_stats(df: pd.DataFrame, impression_col: Optional[str] = None) -> Dict[str, Any]:
     """
     提取数据集的基本统计信息
     
     参数:
         df: 输入的DataFrame
+        impression_col: 诊断结论字段名，如果为None则尝试自动检测
     
     返回:
         包含统计信息的字典
@@ -149,13 +150,24 @@ def extract_basic_stats(df: pd.DataFrame) -> Dict[str, Any]:
     }
     
     # 计算诊断结论的分布情况
-    if '诊断结论' in df.columns:
+    # 优先使用用户指定的字段，否则尝试自动检测
+    diagnosis_column = impression_col
+    if not diagnosis_column or diagnosis_column not in df.columns:
+        # 尝试自动检测诊断结论字段
+        potential_columns = ['诊断结论', 'impression', 'conclusion', 'diagnosis']
+        for col in potential_columns:
+            if col in df.columns:
+                diagnosis_column = col
+                break
+    
+    if diagnosis_column and diagnosis_column in df.columns:
         # 简化诊断（提取第一个诊断条目作为主诊断）
-        df['主要诊断'] = df['诊断结论'].apply(
+        temp_diagnosis = df[diagnosis_column].apply(
             lambda x: x.split('.')[0].strip() if isinstance(x, str) and '.' in x else x
         )
-        diagnosis_counts = df['主要诊断'].value_counts().head(10).to_dict()
+        diagnosis_counts = temp_diagnosis.value_counts().head(10).to_dict()
         stats['前10位诊断分布'] = diagnosis_counts
+        stats['诊断字段'] = diagnosis_column  # 记录实际使用的字段名
     
     return stats
 
