@@ -7,6 +7,8 @@ import os
 import sys
 import json
 import time
+from pathlib import Path
+from datetime import datetime
 
 # 导入字体管理和配置
 from utils import font_manager
@@ -14,6 +16,7 @@ from utils import plot_utils
 
 import config
 from utils.structure_extractor import StructureExtractor
+from utils.result_validator import StructuredResultValidator
 
 plot_utils.configure_chinese_font()
 
@@ -27,6 +30,218 @@ st.title("🔬 结构分析")
 st.markdown("提取医学影像报告中的结构化信息，包括解剖结构、病变特征和诊断信息。")
 
 st.sidebar.header("结构提取选项")
+
+# 在导入部分之后，主要逻辑之前添加验证结果显示函数
+def display_validation_results(original_result, validation_result, issues, corrected_result):
+    """显示验证结果的可视化界面"""
+    
+    st.markdown("### 🔍 质量验证结果")
+    
+    # 验证状态总览
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        validation_status = "✅ 通过" if validation_result else "⚠️ 有问题"
+        st.metric("验证状态", validation_status)
+    
+    with col2:
+        st.metric("发现问题", f"{len(issues)} 个")
+    
+    with col3:
+        # 计算质量分数
+        total_checks = 10  # 假设总共10项检查
+        quality_score = max(0, (total_checks - len(issues)) / total_checks * 100)
+        st.metric("质量分数", f"{quality_score:.0f}%")
+    
+    with col4:
+        # 计算改进程度
+        improvement = len(issues) if issues else 0
+        st.metric("修正项目", f"{improvement} 项")
+    
+    if issues:
+        # 问题详情展示
+        st.markdown("#### 📋 发现的问题")
+        
+        # 问题分类统计
+        problem_categories = {
+            "解剖结构问题": 0,
+            "诊断分类问题": 0, 
+            "映射关系问题": 0,
+            "其他问题": 0
+        }
+        
+        for issue in issues:
+            if "解剖结构" in issue or "拆分" in issue or "重复" in issue:
+                problem_categories["解剖结构问题"] += 1
+            elif "诊断分类" in issue:
+                problem_categories["诊断分类问题"] += 1
+            elif "映射" in issue or "模糊" in issue:
+                problem_categories["映射关系问题"] += 1
+            else:
+                problem_categories["其他问题"] += 1
+        
+        # 问题分类可视化
+        if any(problem_categories.values()):
+            category_col1, category_col2 = st.columns(2)
+            
+            with category_col1:
+                st.markdown("**问题分类统计：**")
+                for category, count in problem_categories.items():
+                    if count > 0:
+                        st.write(f"• {category}: {count} 个")
+            
+            with category_col2:
+                # 创建问题分布饼图
+                import matplotlib.pyplot as plt
+                import matplotlib.font_manager as fm
+                
+                # 设置中文字体
+                plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei']
+                plt.rcParams['axes.unicode_minus'] = False
+                
+                active_categories = {k: v for k, v in problem_categories.items() if v > 0}
+                if active_categories:
+                    fig, ax = plt.subplots(figsize=(6, 4))
+                    colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4']
+                    ax.pie(active_categories.values(), labels=active_categories.keys(), 
+                           autopct='%1.1f%%', colors=colors[:len(active_categories)])
+                    ax.set_title('问题分布', fontsize=14, fontweight='bold')
+                    st.pyplot(fig)
+        
+        # 详细问题列表
+        with st.expander("🔍 查看详细问题列表", expanded=False):
+            for i, issue in enumerate(issues, 1):
+                # 根据问题类型设置不同的图标
+                if "错误" in issue or "拆分" in issue:
+                    icon = "🚨"
+                elif "修正" in issue:
+                    icon = "🔧"
+                elif "替换" in issue:
+                    icon = "🔄"
+                else:
+                    icon = "⚠️"
+                
+                st.write(f"{icon} **问题 {i}**: {issue}")
+        
+        # 修正前后对比
+        st.markdown("#### 📊 修正前后对比")
+        
+        comparison_tabs = st.tabs(["解剖结构对比", "诊断信息对比", "映射关系对比"])
+        
+        with comparison_tabs[0]:
+            # 解剖结构对比
+            col_before, col_after = st.columns(2)
+            
+            with col_before:
+                st.markdown("**修正前:**")
+                original_structures = original_result.get("结构化数据", {}).get("解剖结构", [])
+                for i, struct in enumerate(original_structures, 1):
+                    st.write(f"{i}. {struct.get('原文', '')} → {struct.get('标准名', '')}")
+            
+            with col_after:
+                st.markdown("**修正后:**")
+                corrected_structures = corrected_result.get("结构化数据", {}).get("解剖结构", [])
+                for i, struct in enumerate(corrected_structures, 1):
+                    # 检查是否有修正
+                    original_name = struct.get('标准名', '')
+                    original_struct = next((s for s in original_structures if s.get('原文') == struct.get('原文')), {})
+                    original_standard = original_struct.get('标准名', '')
+                    
+                    if original_name != original_standard:
+                        st.write(f"{i}. {struct.get('原文', '')} → **{original_name}** ✅")
+                    else:
+                        st.write(f"{i}. {struct.get('原文', '')} → {original_name}")
+        
+        with comparison_tabs[1]:
+            # 诊断信息对比
+            col_before, col_after = st.columns(2)
+            
+            with col_before:
+                st.markdown("**修正前:**")
+                original_diagnoses = original_result.get("结构化数据", {}).get("诊断信息", [])
+                for i, diag in enumerate(original_diagnoses, 1):
+                    st.write(f"{i}. 类型: {diag.get('类型', '')} | 描述: {diag.get('描述', '')}")
+            
+            with col_after:
+                st.markdown("**修正后:**")
+                corrected_diagnoses = corrected_result.get("结构化数据", {}).get("诊断信息", [])
+                for i, diag in enumerate(corrected_diagnoses, 1):
+                    # 检查是否有修正
+                    original_diag = original_diagnoses[i-1] if i-1 < len(original_diagnoses) else {}
+                    if diag.get('类型') != original_diag.get('类型'):
+                        st.write(f"{i}. 类型: **{diag.get('类型', '')}** ✅ | 描述: {diag.get('描述', '')}")
+                    else:
+                        st.write(f"{i}. 类型: {diag.get('类型', '')} | 描述: {diag.get('描述', '')}")
+        
+        with comparison_tabs[2]:
+            # 映射关系对比
+            col_before, col_after = st.columns(2)
+            
+            with col_before:
+                st.markdown("**修正前:**")
+                original_mappings = original_result.get("结构化数据", {}).get("影像诊断映射", [])
+                for i, mapping in enumerate(original_mappings, 1):
+                    confidence_color = "🔴" if mapping.get('映射置信度') == "低" else "🟡" if mapping.get('映射置信度') == "中" else "🟢"
+                    st.write(f"{i}. {mapping.get('影像发现', '')} → {mapping.get('对应诊断', '')} {confidence_color}")
+            
+            with col_after:
+                st.markdown("**修正后:**")
+                corrected_mappings = corrected_result.get("结构化数据", {}).get("影像诊断映射", [])
+                for i, mapping in enumerate(corrected_mappings, 1):
+                    confidence_color = "🔴" if mapping.get('映射置信度') == "低" else "🟡" if mapping.get('映射置信度') == "中" else "🟢"
+                    st.write(f"{i}. {mapping.get('影像发现', '')} → {mapping.get('对应诊断', '')} {confidence_color} ✅")
+        
+        # 修正建议操作
+        st.markdown("#### 🎯 处理建议")
+        
+        action_col1, action_col2, action_col3 = st.columns(3)
+        
+        with action_col1:
+            if st.button("✅ 接受所有修正", type="primary", use_container_width=True):
+                # 用修正后的结果替换原始结果
+                st.session_state.analyzed_reports[f"report_{st.session_state.get('current_report_idx', 0)}"] = corrected_result
+                st.success("✅ 已接受所有修正建议，结果已更新！")
+                st.experimental_rerun()
+        
+        with action_col2:
+            if st.button("🔍 查看详细报告", use_container_width=True):
+                # 生成详细的质量报告
+                validator = StructuredResultValidator()
+                detailed_report = validator.generate_quality_report(original_result)
+                
+                with st.expander("📄 详细质量评估报告", expanded=True):
+                    st.markdown(detailed_report)
+        
+        with action_col3:
+            if st.button("💾 保存修正结果", use_container_width=True):
+                # 保存修正后的结果
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"corrected_analysis_{timestamp}.json"
+                
+                # 确保目录存在
+                output_dir = Path("data/processed")
+                output_dir.mkdir(parents=True, exist_ok=True)
+                
+                output_path = output_dir / filename
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    json.dump(corrected_result, f, ensure_ascii=False, indent=2)
+                
+                st.success(f"💾 修正结果已保存到: {output_path}")
+    
+    else:
+        st.success("🎉 恭喜！分析结果质量良好，未发现需要修正的问题。")
+        
+        # 显示质量指标
+        quality_metrics = st.columns(3)
+        
+        with quality_metrics[0]:
+            st.metric("解剖结构", f"{len(original_result.get('结构化数据', {}).get('解剖结构', []))} 个", "✅ 准确")
+        
+        with quality_metrics[1]:
+            st.metric("诊断信息", f"{len(original_result.get('结构化数据', {}).get('诊断信息', []))} 个", "✅ 准确")
+        
+        with quality_metrics[2]:
+            st.metric("映射关系", f"{len(original_result.get('结构化数据', {}).get('影像诊断映射', []))} 个", "✅ 高质量")
 
 # 初始化结构提取器
 if "structure_extractor" not in st.session_state:
@@ -112,6 +327,16 @@ if st.button("分析当前报告", key=f"analyze_{current_idx}"):
         result = extractor.analyze_single_report(image_text, diagnosis_text)
         st.session_state.analyzed_reports[f"report_{current_idx}"] = result
         st.success("结构化分析完成！")
+        
+        # 自动进行质量验证
+        st.markdown("---")
+        with st.spinner("正在进行质量验证..."):
+            validator = StructuredResultValidator()
+            is_valid, issues, corrected_result = validator.validate_structured_result(result)
+            
+            # 显示验证结果的可视化界面
+            display_validation_results(result, is_valid, issues, corrected_result)
+        
         # 结构化结果分tab显示
         if "结构化数据" in result:
             tabs = st.tabs(["解剖结构", "病变特征", "诊断信息", "影像诊断映射"])
@@ -232,11 +457,120 @@ if analysis_mode == "批量报告分析":
                     image_text = rpt.get(findings_column, "") if pd.notna(rpt.get(findings_column, "")) else ""
                     diagnosis_text = rpt.get(impression_column, "") if pd.notna(rpt.get(impression_column, "")) else ""
                     result = extractor.analyze_single_report(image_text, diagnosis_text)
-                    st.session_state.analyzed_reports[f"report_{i}"] = result
+                    
+                    # 自动进行质量验证和修正
+                    validator = StructuredResultValidator()
+                    is_valid, issues, corrected_result = validator.validate_structured_result(result)
+                    
+                    # 如果有问题，自动接受修正结果
+                    if not is_valid and issues:
+                        st.session_state.analyzed_reports[f"report_{i}"] = corrected_result
+                        # 保存验证信息
+                        st.session_state.analyzed_reports[f"report_{i}"]["validation_info"] = {
+                            "original_result": result,
+                            "issues": issues,
+                            "quality_score": max(0, (10 - len(issues)) / 10 * 100)
+                        }
+                    else:
+                        st.session_state.analyzed_reports[f"report_{i}"] = result
+                        st.session_state.analyzed_reports[f"report_{i}"]["validation_info"] = {
+                            "issues": [],
+                            "quality_score": 100
+                        }
                 progress_bar.progress((idx + 1) / total_count)
             st.success(f"本页报告全部分析完成！")
     
-    # 3. 按钮下方实时显示每份报告的分析结果信息
+    # 3. 质量统计汇总
+    if analyzed_count > 0:
+        st.markdown("---")
+        st.markdown("#### 📊 批量分析质量统计")
+        
+        # 统计质量信息
+        quality_scores = []
+        total_issues = 0
+        corrected_reports = 0
+        
+        for i in indices:
+            key = f"report_{i}"
+            if key in st.session_state.analyzed_reports:
+                result = st.session_state.analyzed_reports[key]
+                validation_info = result.get("validation_info", {})
+                quality_score = validation_info.get("quality_score", 100)
+                issues = validation_info.get("issues", [])
+                
+                quality_scores.append(quality_score)
+                total_issues += len(issues)
+                if issues:
+                    corrected_reports += 1
+        
+        if quality_scores:
+            avg_quality = sum(quality_scores) / len(quality_scores)
+            
+            # 显示统计指标
+            stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
+            
+            with stat_col1:
+                st.metric("平均质量分数", f"{avg_quality:.1f}%")
+            
+            with stat_col2:
+                st.metric("发现问题总数", f"{total_issues} 个")
+            
+            with stat_col3:
+                st.metric("修正报告数", f"{corrected_reports} 份")
+            
+            with stat_col4:
+                correction_rate = (corrected_reports / analyzed_count) * 100 if analyzed_count > 0 else 0
+                st.metric("修正率", f"{correction_rate:.1f}%")
+            
+            # 质量分布图
+            if len(quality_scores) > 1:
+                import matplotlib.pyplot as plt
+                
+                plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei']
+                plt.rcParams['axes.unicode_minus'] = False
+                
+                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+                
+                # 质量分数分布
+                ax1.hist(quality_scores, bins=10, alpha=0.7, color='skyblue', edgecolor='black')
+                ax1.set_title('质量分数分布', fontsize=14, fontweight='bold')
+                ax1.set_xlabel('质量分数 (%)')
+                ax1.set_ylabel('报告数量')
+                ax1.grid(True, alpha=0.3)
+                
+                # 质量等级饼图
+                excellent = sum(1 for score in quality_scores if score >= 90)
+                good = sum(1 for score in quality_scores if 70 <= score < 90)
+                poor = sum(1 for score in quality_scores if score < 70)
+                
+                labels = []
+                sizes = []
+                colors = []
+                
+                if excellent > 0:
+                    labels.append(f'优秀 ({excellent})')
+                    sizes.append(excellent)
+                    colors.append('#4CAF50')
+                
+                if good > 0:
+                    labels.append(f'良好 ({good})')
+                    sizes.append(good)
+                    colors.append('#FFC107')
+                
+                if poor > 0:
+                    labels.append(f'需改进 ({poor})')
+                    sizes.append(poor)
+                    colors.append('#F44336')
+                
+                if sizes:
+                    ax2.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
+                    ax2.set_title('质量等级分布', fontsize=14, fontweight='bold')
+                
+                plt.tight_layout()
+                st.pyplot(fig)
+                plt.close()
+    
+    # 4. 按钮下方实时显示每份报告的分析结果信息
     st.markdown("---")
     st.markdown("#### 本页报告分析结果一览：")
     for i in indices:
@@ -244,10 +578,61 @@ if analysis_mode == "批量报告分析":
         if key in st.session_state.analyzed_reports:
             result = st.session_state.analyzed_reports[key]
             summary = "结构化成功"
+            
+            # 获取验证信息
+            validation_info = result.get("validation_info", {})
+            quality_score = validation_info.get("quality_score", 100)
+            issues = validation_info.get("issues", [])
+            
             if "结构化数据" in result:
                 diag_count = len(result["结构化数据"].get("诊断信息", []))
                 summary += f"，诊断数：{diag_count}"
+            
+            # 添加质量状态
+            if quality_score >= 90:
+                quality_icon = "🟢"
+                quality_text = "优秀"
+            elif quality_score >= 70:
+                quality_icon = "🟡"
+                quality_text = "良好"
+            else:
+                quality_icon = "🔴"
+                quality_text = "需要改进"
+            
+            summary += f"，质量：{quality_icon}{quality_text}({quality_score:.0f}%)"
+            
+            if issues:
+                summary += f"，修正了{len(issues)}个问题"
+            
             with st.expander(f"报告{i+1}：{summary}"):
+                # 显示质量信息
+                if validation_info:
+                    quality_col1, quality_col2 = st.columns(2)
+                    with quality_col1:
+                        st.metric("质量分数", f"{quality_score:.0f}%")
+                    with quality_col2:
+                        st.metric("发现问题", f"{len(issues)} 个")
+                    
+                    if issues:
+                        st.markdown("**检测到的问题：**")
+                        for idx, issue in enumerate(issues[:3], 1):  # 只显示前3个问题
+                            st.write(f"{idx}. {issue}")
+                        if len(issues) > 3:
+                            st.write(f"... 还有 {len(issues) - 3} 个问题")
+                        
+                        # 如果有原始结果，提供对比查看选项
+                        if "original_result" in validation_info:
+                            if st.button(f"查看修正详情 - 报告{i+1}", key=f"view_details_{i}"):
+                                st.markdown("---")
+                                display_validation_results(
+                                    validation_info["original_result"], 
+                                    False, 
+                                    issues, 
+                                    result
+                                )
+                
+                # 显示结构化结果
+                st.markdown("**结构化结果：**")
                 st.json(result)
         else:
             st.write(f"报告{i+1}：未分析")

@@ -38,7 +38,7 @@ class StructuredResultValidator:
     
     def validate_structured_result(self, result: Dict[str, Any]) -> Tuple[bool, List[str], Dict[str, Any]]:
         """
-        验证结构化结果的质量
+        验证结构化分析结果的质量
         
         参数:
             result: 结构化分析结果
@@ -64,11 +64,21 @@ class StructuredResultValidator:
                 issues.extend(diagnosis_issues)
                 corrected_result["结构化数据"]["诊断信息"] = corrected_diagnoses
             
-            # 验证影像诊断映射
-            if "结构化数据" in result and "影像诊断映射" in result["结构化数据"]:
-                mappings = result["结构化数据"]["影像诊断映射"]
+            # 验证病变特征缺失
+            if "结构化数据" in result and "原始文本" in result:
                 features = result["结构化数据"].get("病变特征", [])
-                corrected_mappings, mapping_issues = self._validate_mappings(mappings, features)
+                image_text = result["原始文本"].get("影像表现", "")
+                feature_issues, reconstructed_features = self._validate_features_missing(features, image_text)
+                issues.extend(feature_issues)
+                if reconstructed_features:
+                    corrected_result["结构化数据"]["病变特征"] = reconstructed_features
+            
+            # 验证影像诊断映射
+            if "结构化数据" in result:
+                mappings = result["结构化数据"].get("影像诊断映射", [])
+                features = corrected_result["结构化数据"].get("病变特征", [])  # 使用修正后的病变特征
+                diagnoses = corrected_result["结构化数据"].get("诊断信息", [])
+                corrected_mappings, mapping_issues = self._validate_mappings(mappings, features, diagnoses)
                 issues.extend(mapping_issues)
                 corrected_result["结构化数据"]["影像诊断映射"] = corrected_mappings
             
@@ -154,7 +164,120 @@ class StructuredResultValidator:
         
         return corrected_diagnoses, issues
     
-    def _validate_mappings(self, mappings: List[Dict[str, str]], features: List[Dict[str, Any]]) -> Tuple[List[Dict[str, str]], List[str]]:
+    def _validate_features_missing(self, features: List[Dict[str, Any]], image_text: str) -> Tuple[List[str], List[Dict[str, Any]]]:
+        """验证病变特征缺失"""
+        issues = []
+        reconstructed_features = features.copy() if features else []
+        
+        # 定义病变特征关键词
+        pathology_keywords = [
+            '低密度影', '高密度影', '密度影', '占位', '肿块', '结节', 
+            '钙化', '出血', '水肿', '强化', '移位', '受压', '扩大', 
+            '增宽', '变窄', '狭窄', '积液', '囊肿', '病变', '异常',
+            '梗塞', '栓塞', '斑片', '片状', '团状', '条状'
+        ]
+        
+        # 检查是否病变特征为空但影像表现中包含病变描述
+        if len(features) == 0 and image_text:
+            # 检查是否包含病变特征关键词
+            contains_pathology = any(keyword in image_text for keyword in pathology_keywords)
+            
+            if contains_pathology:
+                issues.append("严重问题：检测到影像表现中包含病变描述，但病变特征为空")
+                
+                # 尝试基于关键词重构基本的病变特征
+                reconstructed_features = self._reconstruct_features_from_text(image_text)
+                
+                if reconstructed_features:
+                    issues.append(f"自动重构了 {len(reconstructed_features)} 个病变特征")
+                else:
+                    issues.append("自动重构病变特征失败，需要重新分析")
+        
+        # 检查现有病变特征的合理性
+        elif len(features) > 0:
+            for feature in features:
+                feature_name = feature.get("名称", "")
+                # 检查特征名称是否与影像文本相关
+                if feature_name and not any(keyword in feature_name for keyword in pathology_keywords):
+                    issues.append(f"病变特征可能不准确：'{feature_name}' 缺少病理描述")
+        
+        return issues, reconstructed_features
+    
+    def _reconstruct_features_from_text(self, image_text: str) -> List[Dict[str, Any]]:
+        """从影像表现文本中重构基本的病变特征"""
+        reconstructed = []
+        
+        # 基于常见模式进行简单的病变特征提取
+        import re
+        
+        # 模式1: 解剖位置 + 见 + 特征描述
+        pattern1 = r'([^，。]+?)见([^，。]*?(?:密度影|占位|肿块|结节|钙化|病变)[^，。]*?)(?:[，。]|$)'
+        matches1 = re.findall(pattern1, image_text)
+        
+        for i, (location, description) in enumerate(matches1):
+            location = location.strip()
+            description = description.strip()
+            if location and description:
+                reconstructed.append({
+                    "名称": f"{location}-{description}",
+                    "特征": {
+                        "解剖位置": location,
+                        "大小": "",
+                        "形态": "",
+                        "特性": description,
+                        "边界": "",
+                        "数量": "",
+                        "分布": "",
+                        "其他特征": "自动重构"
+                    }
+                })
+        
+        # 模式2: 结构 + 形容词（如：移位、受压、扩大等）
+        pattern2 = r'([^，。]+?)(移位|受压|扩大|增宽|变窄|狭窄)(?:[，。]|$)'
+        matches2 = re.findall(pattern2, image_text)
+        
+        for location, change in matches2:
+            location = location.strip()
+            if location and change:
+                reconstructed.append({
+                    "名称": f"{location}-{change}",
+                    "特征": {
+                        "解剖位置": location,
+                        "大小": "",
+                        "形态": "",
+                        "特性": change,
+                        "边界": "",
+                        "数量": "",
+                        "分布": "",
+                        "其他特征": "自动重构"
+                    }
+                })
+        
+        # 模式3: 强化模式
+        pattern3 = r'(.*?)呈([^，。]*?强化[^，。]*?)(?:[，。]|$)'
+        matches3 = re.findall(pattern3, image_text)
+        
+        for location, enhancement in matches3:
+            location = location.strip() if location else "病变"
+            enhancement = enhancement.strip()
+            if enhancement:
+                reconstructed.append({
+                    "名称": f"{location}-{enhancement}",
+                    "特征": {
+                        "解剖位置": location,
+                        "大小": "",
+                        "形态": "",
+                        "特性": enhancement,
+                        "边界": "",
+                        "数量": "",
+                        "分布": "",
+                        "其他特征": "自动重构-强化特征"
+                    }
+                })
+        
+        return reconstructed
+    
+    def _validate_mappings(self, mappings: List[Dict[str, str]], features: List[Dict[str, Any]], diagnoses: List[Dict[str, Any]] = None) -> Tuple[List[Dict[str, str]], List[str]]:
         """验证影像诊断映射"""
         issues = []
         corrected_mappings = []
