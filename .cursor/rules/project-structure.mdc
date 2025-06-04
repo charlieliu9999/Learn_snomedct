@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 医学影像报告系统项目结构指南
+
+## 项目概述
+本项目是一个基于SNOMED CT的医学影像报告结构化分析系统。主要包含以下核心组件：
+
+## 核心目录结构
+- [01_LOINC_RSNA_Radiology/](mdc:01_LOINC_RSNA_Radiology) - LOINC和RSNA放射学标准集成
+- [02_SNOMED_CT_v2.0/](mdc:02_SNOMED_CT_v2.0) - SNOMED CT核心功能实现
+- [03_Image_snomed_struction/](mdc:03_Image_snomed_struction) - 影像报告结构化处理
+- [04_medical_report_analyzer/](mdc:04_medical_report_analyzer) - 医疗报告分析器
+- [05_report_anasisys/](mdc:05_report_anasisys) - 报告分析核心模块
+- [07_medicine_kag/](mdc:07_medicine_kag) - 医学知识图谱构建
+
+## 关键文档
+- [Product_Design_Document.md](mdc:Product_Design_Document.md) - 产品设计文档
+- [Product_Requirements_Document.md](mdc:Product_Requirements_Document.md) - 产品需求文档
+- [Project_Plan.md](mdc:Project_Plan.md) - 项目计划
+- [医学影像报告SNOMED CT结构化分析系统.md](mdc:医学影像报告SNOMED CT结构化分析系统.md) - 系统总体说明
+
+## 开发指南
+1. 新功能开发应在相应的子目录中进行
+2. 保持目录结构清晰，遵循模块化原则
+3. 文档更新需同步到相应的markdown文件
+4. 代码变更需要同步更新测试用例

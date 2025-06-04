@@ -86,3 +86,14 @@ COMMON_DIAGNOSES = [
     "支气管扩张", "胸腔积液", "胸膜炎", "纵隔肿瘤",
     "淋巴结肿大", "肺不张", "肺纤维化"
 ]
+
+# Neo4j 配置 (Docker环境)
+NEO4J_CONFIG = {
+    "uri": "bolt://localhost:7687",  # Neo4j Docker默认端口
+    "user": "neo4j",               # 默认用户名
+    "password": "neo4j@openspg",    # 根据测试成功的连接信息
+    "database": "neo4j"            # 默认数据库名称
+}
+
+# 是否使用Neo4j进行知识图谱存储
+USE_NEO4J = True   # 启用Neo4j存储

@@ -1,0 +1,6 @@
+GEMINI_API_KEY\s*=\s*['"].*?['"]==>GEMINI_API_KEY = ''
+OPENAI_API_KEY\s*=\\s*['\"]).*?(['\"])==>OPENAI_API_KEY = \\1\\2
+SECRET_KEY\s*=\s*['"].*?['"]==>SECRET_KEY = ''
+sk-[a-zA-Z0-9]{32,}==>REDACTED_API_KEY
+pKjtrFOr7w4QUzBTEjXdpV33QzVEHR49kvkZmGFV==>REDACTED_TOKEN
+https://github.com/charlieliu9999/Learn_snomedct/security/secret-scanning/unblock-secret/2xcSgu7s1yg23jgEUruHKDIm8==>REDACTED_UNBLOCK_URL

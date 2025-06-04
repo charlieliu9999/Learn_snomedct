@@ -2,14 +2,28 @@
 关系建模模块，负责构建影像与诊断之间的关联关系模型
 """
 
-import pandas as pd
-import numpy as np
 import json
 import logging
+import os
+import sys
 from typing import Dict, List, Any, Optional
 from collections import Counter, defaultdict
 
+# 添加项目根目录到路径
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# 导入项目模块
+import config
 from .llm_client import LLMClient
+from .knowledge_graph import MedicalKnowledgeGraph, NODE_TYPES, RELATION_TYPES
+
+# 有条件导入Neo4j连接器
+if config.USE_NEO4J:
+    try:
+        from .neo4j_connector import Neo4jConnector
+    except ImportError:
+        logging.warning("未能导入Neo4j连接器，请确保已安装neo4j库")
+        config.USE_NEO4J = False
 
 # 设置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -28,6 +42,19 @@ class RelationshipBuilder:
         self.llm_client = llm_client
         self.feature_diagnosis_pairs = []
         self.knowledge_base = {}
+        self.graph = MedicalKnowledgeGraph()
+        self.neo4j_client = None
+        
+        # 如果配置了使用Neo4j，初始化连接器
+        if config.USE_NEO4J:
+            try:
+                self.neo4j_client = Neo4jConnector()
+                if not self.neo4j_client.test_connection():
+                    logger.warning("无法连接到Neo4j数据库，将使用内存存储知识图谱")
+                    self.neo4j_client = None
+            except Exception as e:
+                logger.error(f"初始化Neo4j失败: {str(e)}")
+                self.neo4j_client = None
     
     def add_mapping(self, mapping: Dict[str, Any]) -> None:
         """
@@ -272,4 +299,194 @@ class RelationshipBuilder:
             return True
         except Exception as e:
             logger.error(f"加载知识库失败: {str(e)}")
+            return False
+            
+    def build_knowledge_graph(self) -> MedicalKnowledgeGraph:
+        """
+        基于已添加的映射构建知识图谱
+        
+        返回:
+            知识图谱对象
+        """
+        # 清空现有图谱
+        self.graph.clear()
+        
+        if not self.feature_diagnosis_pairs:
+            logger.warning("没有足够的数据来构建知识图谱")
+            return self.graph
+            
+        # 添加诊断节点
+        for pair in self.feature_diagnosis_pairs:
+            diagnosis = pair["diagnosis"]
+            if diagnosis:
+                # 添加诊断节点
+                self.graph.add_node(
+                    id=diagnosis,
+                    type=NODE_TYPES["DIAGNOSIS"],
+                    properties={
+                        "name": diagnosis
+                    }
+                )
+        
+        # 添加特征节点和关系
+        for pair in self.feature_diagnosis_pairs:
+            feature = pair["feature"]
+            diagnosis = pair["diagnosis"]
+            support_level = pair["support_level"]
+            explanation = pair.get("explanation", "")
+            
+            if not feature or not diagnosis:
+                continue
+                
+            # 尝试提取解剖信息
+            anatomy_info = self._extract_anatomy_from_feature(feature)
+            
+            # 添加特征节点
+            self.graph.add_node(
+                id=feature,
+                type=NODE_TYPES["FEATURE"],
+                properties={
+                    "name": feature,
+                    "anatomy": anatomy_info
+                }
+            )
+            
+            # 添加解剖部位节点（如果提取到）
+            if anatomy_info:
+                self.graph.add_node(
+                    id=anatomy_info,
+                    type=NODE_TYPES["ANATOMY"],
+                    properties={
+                        "name": anatomy_info
+                    }
+                )
+                
+                # 添加特征与解剖部位的关系
+                self.graph.add_relation(
+                    from_id=feature,
+                    to_id=anatomy_info,
+                    type=RELATION_TYPES["LOCATED_AT"],
+                    properties={}
+                )
+            
+            # 计算置信度
+            confidence = self._calculate_confidence(feature, diagnosis)
+            
+            # 添加特征->诊断关系
+            self.graph.add_relation(
+                from_id=feature,
+                to_id=diagnosis,
+                type=RELATION_TYPES["INDICATES"],
+                properties={
+                    "support_level": support_level,
+                    "confidence": confidence,
+                    "explanation": explanation
+                }
+            )
+            
+            # 添加诊断->特征关系
+            self.graph.add_relation(
+                from_id=diagnosis,
+                to_id=feature,
+                type=RELATION_TYPES["EXHIBITS"],
+                properties={
+                    "typical": support_level == "高"
+                }
+            )
+        
+        # 添加特征之间的共存关系
+        self._add_coexistence_relations()
+        
+        logger.info(f"已构建知识图谱: {len(self.graph.nodes)}个节点, {len(self.graph.relations)}个关系")
+        return self.graph
+    
+    def _extract_anatomy_from_feature(self, feature: str) -> str:
+        """
+        从特征描述中提取解剖部位信息
+        
+        参数:
+            feature: 特征描述
+            
+        返回:
+            解剖部位，如果没有提取到则返回空字符串
+        """
+        # 简单的关键词匹配
+        for anatomy in config.CHEST_ANATOMY:
+            if anatomy in feature:
+                return anatomy
+        return ""
+    
+    def _calculate_confidence(self, feature: str, diagnosis: str) -> float:
+        """
+        计算特征对诊断的置信度
+        
+        参数:
+            feature: 特征描述
+            diagnosis: 诊断名称
+            
+        返回:
+            置信度（0-1之间的浮点数）
+        """
+        # 获取该特征在所有诊断中的出现次数
+        feature_count = sum(1 for pair in self.feature_diagnosis_pairs if pair["feature"] == feature)
+        
+        # 获取该特征对该诊断的出现次数
+        feature_diag_count = sum(1 for pair in self.feature_diagnosis_pairs 
+                              if pair["feature"] == feature and pair["diagnosis"] == diagnosis)
+        
+        # 计算置信度
+        if feature_count > 0:
+            return feature_diag_count / feature_count
+        return 0
+    
+    def _add_coexistence_relations(self) -> None:
+        """
+        添加特征之间的共存关系
+        """
+        # 按诊断分组，找出同一诊断中共同出现的特征
+        features_by_diagnosis = defaultdict(list)
+        for pair in self.feature_diagnosis_pairs:
+            features_by_diagnosis[pair["diagnosis"]].append(pair["feature"])
+        
+        # 对每个诊断中的特征对添加共存关系
+        for diagnosis, features in features_by_diagnosis.items():
+            if len(features) < 2:
+                continue
+                
+            # 对特征两两组合
+            for i in range(len(features)):
+                for j in range(i+1, len(features)):
+                    feature1 = features[i]
+                    feature2 = features[j]
+                    
+                    # 添加双向共存关系
+                    self.graph.add_relation(
+                        from_id=feature1,
+                        to_id=feature2,
+                        type=RELATION_TYPES["COEXISTS_WITH"],
+                        properties={
+                            "diagnosis": diagnosis
+                        }
+                    )
+    
+    def save_to_neo4j(self) -> bool:
+        """
+        将知识图谱保存到Neo4j数据库
+        
+        返回:
+            是否成功保存
+        """
+        if not self.neo4j_client:
+            logger.warning("Neo4j客户端未初始化，无法保存到Neo4j")
+            return False
+            
+        try:
+            # 先构建知识图谱
+            self.build_knowledge_graph()
+            
+            # 保存到Neo4j
+            self.neo4j_client.save_knowledge_graph(self.graph)
+            return True
+        except Exception as e:
+            logger.error(f"保存知识图谱到Neo4j失败: {str(e)}")
             return False

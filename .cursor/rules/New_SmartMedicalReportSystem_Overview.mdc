@@ -1,0 +1,39 @@
+---
+description: 项目情况的说明
+globs: 
+alwaysApply: false
+---
+# Smart Medical Report System - Project Overview and Key Resources
+
+This project aims to build an intelligent medical imaging report system. The primary focus is on leveraging LLMs for text understanding, SNOMED CT for standardization, and enabling a dual-direction (影像驱动诊断, 诊断驱动描述) report generation process.
+
+## Key Planning Documents
+
+The core strategic direction and implementation plan are detailed in:
+
+*   **Product Goals and Description**: [`SmartMedicalReportSystem_Main/医学影像智能报告系统-产品目标与说明.md`](mdc:SmartMedicalReportSystem_Main/医学影像智能报告系统-产品目标与说明.md)
+*   **Phased Implementation Plan**: [`SmartMedicalReportSystem_Main/医学影像智能报告系统-分阶段实施方案.md`](mdc:SmartMedicalReportSystem_Main/医学影像智能报告系统-分阶段实施方案.md)
+
+Please refer to these documents first to understand the project's objectives and roadmap, especially the "Phase 0: Proof-of-Concept" focused on SNOMED CT mapping.
+
+## Core Technical Components & Strategy
+
+The system development will follow a phased approach, starting with a Proof-of-Concept (PoC) to validate key technologies:
+
+1.  **LLM-based Entity Extraction**:
+    *   Initial work based on [`05_report_anasisys/medical_report_analyzer_02结构化/utils/StructureExtractor.py`](mdc:05_report_anasisys/medical_report_analyzer_02结构化/utils/StructureExtractor.py).
+    *   Focus: Extracting medical entities from Chinese text for SNOMED CT mapping.
+2.  **SNOMED CT Standardization (Critical for PoC)**:
+    *   **Current Challenge**: Acquiring SNOMED CT data resources (API access or RF2 files) is the immediate priority.
+    *   Potential reusable assets for SNOMED CT processing (once data is available):
+        *   For RF2-based local graph: [`SNOBERT/src/snomed_graph.py`](mdc:SNOBERT/src/snomed_graph.py)
+        *   For API-based access: [`03_Image_snomed_struction/snomed_client.py`](mdc:03_Image_snomed_struction/snomed_client.py)
+        *   Higher-level service concepts: [`03_Image_snomed_struction/enhanced_terminology_services.py`](mdc:03_Image_snomed_struction/enhanced_terminology_services.py)
+3.  **Visual Report Template Management**: A new system component to be developed.
+4.  **Knowledge Graph**: To be built using Neo4j, centered around SNOMED CT concepts. Models in [`04_medical_report_analyzer/src/models/report.py`](mdc:04_medical_report_analyzer/src/models/report.py) show prior art for SCT-aware data models.
+5.  **Dual-Direction Reporting**: The ultimate goal for the report generation module.
+
+## Current Focus (as of last discussion)
+
+*   Resolving the SNOMED CT data access issue is paramount before fully proceeding with the SNOMED CT mapping PoC.
+*   Analyzing sample report data from `08_data/` (once text is accessible) to inform LLM extraction and understand requirements.

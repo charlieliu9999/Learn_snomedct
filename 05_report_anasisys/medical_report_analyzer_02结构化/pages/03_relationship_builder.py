@@ -17,6 +17,9 @@ from pyvis.network import Network
 # 导入自定义网络可视化工具
 from utils.network_visualizer import create_relationship_graph
 
+# 导入知识图谱模式组件
+from pages.knowledge_graph_mode import display_knowledge_graph_ui
+
 # 添加父目录到路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -58,7 +61,7 @@ st.sidebar.header("关系建模选项")
 
 modeling_mode = st.sidebar.radio(
     "建模模式",
-    ["构建知识库", "查看关系模型", "生成双向模板"]
+    ["构建知识库", "查看关系模型", "知识图谱", "生成双向模板"]
 )
 
 # 构建知识库模式
@@ -299,9 +302,13 @@ elif modeling_mode == "查看关系模型":
             else:
                 st.info("无诊断指南数据")
 
+# 知识图谱模式
+elif modeling_mode == "知识图谱":
+    display_knowledge_graph_ui()
+
 # 生成双向模板模式
 elif modeling_mode == "生成双向模板":
-    st.markdown("### 生成双向驱动模板")
+    st.markdown("### 生成影像-诊断双向模板")
     
     # 如果已有知识库，使用已有数据
     if "knowledge_base" in st.session_state and "bidirectional_templates" in st.session_state.knowledge_base:

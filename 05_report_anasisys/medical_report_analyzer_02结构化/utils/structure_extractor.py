@@ -4,20 +4,18 @@
 
 import logging
 import time
-from typing import Dict, List, Any
+import json
+import hashlib
+from typing import Dict, List, Any, Optional, Callable
 
 from .llm_client import LLMClient
+from .prompt_templates import PromptTemplateManager
 
 # 设置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class StructureExtractor:
-    """医学报告结构提取器"""
-    
-    # 添加调试信息记录
-    debug_info = {}
-    
     def __init__(self, llm_client: LLMClient):
         """
         初始化结构提取器
@@ -27,7 +25,116 @@ class StructureExtractor:
         """
         self.llm_client = llm_client
         self.status_callback = None  # 状态回调函数
-    
+        
+        # 添加提示词模板管理器
+        self.prompt_manager = PromptTemplateManager()
+        
+        # 添加简单缓存
+        self.cache = {}
+        self.debug_info = {}
+        
+        # 默认报告类型
+        self.report_type = "default"
+
+    def analyze_single_report(self, report_text: str, diagnosis_text: str = "") -> Dict[str, Any]:
+        """
+        分析单份医学影像报告
+        
+        参数:
+            report_text: 影像表现文本
+            diagnosis_text: 诊断结论文本
+            
+        返回:
+            包含结构化数据和分析信息的字典
+        """
+        logger.info(f"开始分析单份报告：{report_text[:30]}...，诊断：{diagnosis_text[:30]}...")
+        
+        try:
+            # 提取结构化数据
+            logger.info("调用extract_report_structure开始提取结构化数据")
+            structured_data = self.extract_report_structure(report_text, diagnosis_text)
+            logger.info(f"extract_report_structure返回结果类型: {type(structured_data)}")
+            
+            # 组织返回结果
+            result = {
+                "结构化数据": {
+                    "解剖结构": structured_data.get("解剖结构", []),
+                    "病变特征": structured_data.get("病变特征", []),
+                    "诊断信息": structured_data.get("诊断信息", []),
+                    "影像诊断映射": structured_data.get("映射关系", [])
+                },
+                "原始文本": {
+                    "影像表现": report_text,
+                    "诊断结论": diagnosis_text
+                },
+                "分析信息": {
+                    "处理时间": structured_data.get("处理时间", ""),
+                    "处理状态": "成功"
+                }
+            }
+            
+            # 如果有调试信息，添加到结果中
+            if "调试信息" in structured_data:
+                result["调试信息"] = structured_data["调试信息"]
+                
+            logger.info(f"单份报告分析完成，结果: {result.keys()}")
+            # 打印更详细的结果信息
+            logger.info(f"解剖结构数量: {len(result['结构化数据']['解剖结构'])}")
+            logger.info(f"病变特征数量: {len(result['结构化数据']['病变特征'])}")
+            logger.info(f"诊断信息数量: {len(result['结构化数据']['诊断信息'])}")
+            logger.info(f"影像诊断映射数量: {len(result['结构化数据']['影像诊断映射'])}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"单份报告分析失败: {str(e)}")
+            # 返回错误信息
+            return {
+                "原始文本": {
+                    "影像表现": report_text,
+                    "诊断结论": diagnosis_text
+                },
+                "分析信息": {
+                    "处理状态": "失败"
+                },
+                "分析错误": str(e)
+            }
+
+    def detect_report_type(self, report_text: str) -> str:
+        """
+        检测报告类型
+        
+        参数:
+            report_text: 报告文本
+        
+        返回:
+            报告类型 (胸部CT, 腹部超声, 等)
+        """
+        # 简单的关键词匹配规则
+        report_text_lower = report_text.lower()
+        
+        if "ct" in report_text_lower and ("胸" in report_text or "肺" in report_text):
+            return "胸部CT"
+        elif "超声" in report_text_lower and ("腹" in report_text or "肝" in report_text or "胆" in report_text):
+            return "腹部超声"
+        elif "mri" in report_text_lower:
+            return "MRI"
+        
+        # 默认返回通用类型
+        return "default"
+        
+    def _get_cache_key(self, text: str) -> str:
+        """
+        生成缓存键
+        
+        参数:
+            text: 文本内容
+        
+        返回:
+            缓存键
+        """
+        # 使用MD5哈希作为缓存键
+        return hashlib.md5(text.encode('utf-8')).hexdigest()
+
     def extract_anatomical_structures(self, report_text: str) -> List[Dict[str, str]]:
         """
         从报告文本中提取解剖结构
@@ -38,394 +145,405 @@ class StructureExtractor:
         返回:
             解剖结构列表，每个结构包含原文、标准名称和父结构
         """
-        prompt = f"""
-        从以下胸部CT报告文本中提取所有提到的解剖结构，包括器官、组织和位置
-
-        报告文本:
-        {report_text}
+        logger.info("开始提取解剖结构")
+        # 检查缓存
+        cache_key = self._get_cache_key(f"anatomical_{report_text}")
+        if cache_key in self.cache:
+            logger.info("使用缓存的解剖结构提取结果")
+            return self.cache[cache_key]
         
-        请按以下JSON格式返回结果，注意所有标准名和父结构必须使用中文名称，不要使用英文:
-        [
-          {{"原文": "右肺中叶", "标准名": "右肺中叶", "父结构": "右肺"}},
-          {{"原文": "胸膜", "标准名": "胸膜", "父结构": "胸腔"}},
-          ...
-        ]
+        # 检测报告类型
+        report_type = self.detect_report_type(report_text)
         
-        仅返回报告中明确提到的解剖结构，不要添加推测的结构
-        所有标准名和父结构必须使用中文名称，不要使用英文
-        """
+        # 使用模板管理器获取提示词
+        prompt = self.prompt_manager.get_prompt(
+            "anatomical", 
+            report_type, 
+            report_text=report_text
+        )
         
         # 保存提示词用于调试
         self.debug_info["解剖结构_提示词"] = prompt
+        self.debug_info["解剖结构_报告类型"] = report_type
         
         try:
+            # 调用LLM进行提取
+            logger.info("调用LLM进行解剖结构提取")
             result = self.llm_client.extract_json(prompt)
-            # 保存模型响应用于调试
-            self.debug_info["解剖结构_响应"] = result
+            logger.info(f"LLM返回结果类型: {type(result)}")
             
-            if isinstance(result, list):
-                return result
-            elif isinstance(result, dict) and "error" in result:
-                logger.error(f"提取解剖结构失败: {result['error']}")
-                return []
+            # 提取结构列表 - 处理多种格式
+            if isinstance(result, dict) and "解剖结构" in result:
+                structures = result["解剖结构"]
+            elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], dict) and "原文" in result[0]:
+                # 如果直接返回了解剖结构列表
+                structures = result
+                logger.info(f"兼容处理：直接从列表提取解剖结构，找到 {len(structures)} 个结构")
             else:
+                logger.warning(f"解剖结构提取结果格式错误: {result}")
                 return []
+                
+            # 保存到缓存
+            self.cache[cache_key] = structures
+            return structures
+                
         except Exception as e:
-            logger.error(f"提取解剖结构时发生错误: {str(e)}")
-            self.debug_info["解剖结构_错误"] = str(e)
+            logger.error(f"解剖结构提取失败: {str(e)}")
             return []
-    
-    def extract_lesion_features(self, report_text: str) -> List[Dict[str, Any]]:
+            
+    def extract_lesion_features(self, report_text: str, structures: List[Dict[str, str]] = None) -> List[Dict[str, Any]]:
         """
         从报告文本中提取病变特征
         
         参数:
             report_text: 报告文本
-        
+            structures: 可选的解剖结构列表，如果提供，将提高提取质量
+            
         返回:
-            病变特征列表，每个病变包含位置、大小、形态等信息
+            病变特征列表
         """
-        prompt = f"""
-        从以下胸部CT报告文本中提取所有病变特征信息
-
-        报告文本:
-        {report_text}
+        # 检查缓存
+        cache_key = self._get_cache_key(f"lesion_{report_text}")
+        if cache_key in self.cache:
+            logger.info("使用缓存的病变特征提取结果")
+            return self.cache[cache_key]
+            
+        # 检测报告类型
+        report_type = self.detect_report_type(report_text)
         
-        请分析文本中描述的每个病变，提取以下特征：
-        1. 解剖位置 - 病变所在的具体解剖结构
-        2. 大小 - 病变的尺寸描述
-        3. 形态 - 病变的形状特征
-        4. 密度 - 病变的密度特征
-        5. 边界 - 病变边界的描述
-        6. 数量 - 病变的数量
-        7. 分布 - 病变的分布特征
-        8. 其他特征 - 其他相关描述
+        # 构建提示词
+        prompt_args = {
+            "report_text": report_text
+        }
         
-        请按以下JSON格式返回结果，所有字段必须使用中文名称和描述，不要使用英文:
-        [
-          {{
-            "解剖位置": "右肺上叶",
-            "大小": "2.5cm×1.8cm",
-            "形态": "结节状",
-            "密度": "软组织密度",
-            "边界": "边界清晰",
-            "数量": "单发",
-            "分布": "周围型",
-            "其他特征": "无钥化"
-          }},
-          ...
-        ]
-        
-        如果报告中没有明确描述某项特征，则对应字段返回空字符串
-        """
+        # 如果有解剖结构，添加到提示词中
+        if structures:
+            prompt_args["structures"] = json.dumps(structures, ensure_ascii=False)
+            
+        # 获取提示词
+        prompt = self.prompt_manager.get_prompt(
+            "lesion",
+            report_type,
+            **prompt_args
+        )
         
         # 保存提示词用于调试
         self.debug_info["病变特征_提示词"] = prompt
         
         try:
+            # 调用LLM进行提取
             result = self.llm_client.extract_json(prompt)
-            # 保存模型响应用于调试
-            self.debug_info["病变特征_响应"] = result
             
-            if isinstance(result, list):
-                return result
-            elif isinstance(result, dict) and "error" in result:
-                logger.error(f"提取病变特征失败: {result['error']}")
-                return []
+            # 提取特征列表 - 增加格式兼容性处理并改进结构
+            if isinstance(result, dict):
+                if "病变特征" in result:
+                    features = result["病变特征"]
+                elif "病变" in result:  # 兼容"病变"字段
+                    raw_features = result["病变"]
+                    logger.info(f"兼容处理：从'病变'字段提取特征，找到 {len(raw_features)} 个特征")
+                    
+                    # 改进病变特征的结构，添加名称字段
+                    features = []
+                    for i, feature in enumerate(raw_features):
+                        # 根据解剖位置和特性生成名称
+                        name = ""
+                        if "\u89e3\u5256\u4f4d\u7f6e" in feature and feature["\u89e3\u5256\u4f4d\u7f6e"]:
+                            name += feature["\u89e3\u5256\u4f4d\u7f6e"]
+                        if "\u7279\u6027" in feature and feature["\u7279\u6027"]:
+                            if name: name += "-"
+                            name += feature["\u7279\u6027"]
+                        if not name:
+                            name = f"病变{i+1}"
+                            
+                        # 创建新结构
+                        new_feature = {
+                            "名称": name,
+                            "特征": feature
+                        }
+                        features.append(new_feature)
+                    
+                    logger.info(f"结构化后共 {len(features)} 个病变特征")
+                else:
+                    logger.warning(f"病变特征提取结果格式错误: {result}")
+                    return []
+                
+                # 保存到缓存
+                self.cache[cache_key] = features
+                return features
             else:
+                logger.warning(f"病变特征提取结果格式错误，不是字典类型: {result}")
                 return []
+                
         except Exception as e:
-            logger.error(f"提取病变特征时发生错误: {str(e)}")
-            self.debug_info["病变特征_错误"] = str(e)
+            logger.error(f"病变特征提取失败: {str(e)}")
             return []
-    
-    def extract_diagnoses(self, diagnosis_text: str) -> List[Dict[str, str]]:
+            
+    def extract_diagnosis_info(self, diagnosis_text: str) -> List[Dict[str, str]]:
         """
-        从诊断结论文本中提取诊断信息
+        从诊断结论中提取诊断信息
         
         参数:
             diagnosis_text: 诊断结论文本
-        
+            
         返回:
-            诊断信息列表，每个诊断包含类型和描述
+            诊断信息列表
         """
-        prompt = f"""
-        从以下胸部CT报告的诊断结论文本中提取诊断信息
-
-        诊断结论文本:
-        {diagnosis_text}
-        
-        请分析文本中的诊断信息，提取以下内容：
-        1. 主要诊断 - 报告中的主要诊断结论
-        2. 鉴别诊断 - 可能的鉴别诊断
-        3. 建议 - 医生的建议或随访计划
-        
-        请按以下JSON格式返回结果，所有字段必须使用中文名称和描述，不要使用英文：
-        [
-          {
-            "类型": "主要诊断",
-            "描述": "右肺上叶周围型肺癌"
-          },
-          {
-            "类型": "鉴别诊断",
-            "描述": "肺结核球"
-          },
-          {
-            "类型": "建议",
-            "描述": "建议进一步PET-CT检查"
-          },
-          ...
-        ]
-        
-        请确保所有诊断名称和描述都使用中文表达，不要使用英文术语
-        
-        如果报告中没有某类信息，则不要在结果中包含该类型
-        """
+        # 检查缓存
+        cache_key = self._get_cache_key(f"diagnosis_{diagnosis_text}")
+        if cache_key in self.cache:
+            logger.info("使用缓存的诊断信息提取结果")
+            return self.cache[cache_key]
+            
+        # 如果诊断文本为空，返回空列表
+        if not diagnosis_text or diagnosis_text.strip() == "":
+            logger.warning("诊断文本为空，跳过提取")
+            return []
+            
+        # 使用通用诊断提示词
+        prompt = self.prompt_manager.get_prompt(
+            "diagnosis",
+            "default",
+            diagnosis_text=diagnosis_text
+        )
         
         # 保存提示词用于调试
         self.debug_info["诊断信息_提示词"] = prompt
         
         try:
+            # 调用LLM进行提取
             result = self.llm_client.extract_json(prompt)
-            # 保存模型响应用于调试
-            self.debug_info["诊断信息_响应"] = result
             
-            if isinstance(result, list):
-                return result
-            elif isinstance(result, dict) and "error" in result:
-                logger.error(f"提取诊断信息失败: {result['error']}")
-                return []
+            # 提取诊断列表 - 增加格式兼容性处理
+            if isinstance(result, dict) and "诊断信息" in result:
+                diagnoses = result["诊断信息"]
+            elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], dict):  # 直接返回了列表
+                diagnoses = result
+                logger.info(f"兼容处理：直接从列表提取诊断，找到 {len(diagnoses)} 个诊断")
             else:
+                logger.warning(f"诊断信息提取结果格式错误: {result}")
                 return []
+                
+            # 保存到缓存
+            self.cache[cache_key] = diagnoses
+            return diagnoses
+                
         except Exception as e:
-            logger.error(f"提取诊断信息时发生错误: {str(e)}")
-            self.debug_info["诊断信息_错误"] = str(e)
+            logger.error(f"诊断信息提取失败: {str(e)}")
             return []
-    
-    def extract_report_sections(self, report_text: str) -> Dict[str, str]:
-        """
-        将报告文本分解为不同的部分
-        
-        参数:
-            report_text: 报告文本
-        
-        返回:
-            报告各部分的字典
-        """
-        prompt = f"""
-        请将以下胸部CT报告的影像表现文本分解为不同的解剖部分
-        
-        报告文本:
-        {report_text}
-        
-        请按以下JSON格式返回结果:
-        {{
-          "胸廓与胸膜": "胸廓对称，未见明显骨质破坏...",
-          "肺部": "双肺纹理清晰，分布均匀...",
-          "纵隔": "纵隔居中，未见肿大淋巴结...",
-          "心脏与大血管": "心脏大小正常，主动脉走形正常..."
-        }}
-        
-        根据报告内容提取相关解剖部位的描述，如果某部分在报告中未提及，则不要包含该部分
-        """
-        
-        # 保存提示词用于调试
-        self.debug_info["报告部分_提示词"] = prompt
-        
-        try:
-            result = self.llm_client.extract_json(prompt)
-            # 保存模型响应用于调试
-            self.debug_info["报告部分_响应"] = result
             
-            if isinstance(result, dict):
-                # 移除空字段
-                return {k: v for k, v in result.items() if v.strip()}
-            elif isinstance(result, dict) and "error" in result:
-                error_msg = f"分解报告部分失败: {result['error']}"
-                logger.error(error_msg)
-                self.debug_info["报告部分_错误"] = error_msg
-                return {"完整文本": report_text}
-            else:
-                self.debug_info["报告部分_错误"] = "返回结果不是字典格式"
-                return {"完整文本": report_text}
-        except Exception as e:
-            error_msg = f"分解报告部分时发生错误: {str(e)}"
-            logger.error(error_msg)
-            self.debug_info["报告部分_错误"] = error_msg
-            return {"完整文本": report_text}
-    
-    def build_image_diagnosis_mapping(self, image_text: str, diagnosis_text: str) -> Dict[str, List[str]]:
+    def map_findings_to_diagnosis(self, 
+                                structures: List[Dict[str, str]], 
+                                features: List[Dict[str, Any]],
+                                diagnoses: List[Dict[str, str]]) -> List[Dict[str, Any]]:
         """
-        构建影像表现与诊断结论之间的映射关系
+        将影像发现映射到诊断结论
         
         参数:
-            image_text: 影像表现文本
-            diagnosis_text: 诊断结论文本
-        
+            structures: 解剖结构列表
+            features: 病变特征列表
+            diagnoses: 诊断信息列表
+            
         返回:
-            影像表现与诊断结论的映射关系
+            映射关系列表
         """
-        prompt = f"""
-        请分析以下胸部CT报告的影像表现和诊断结论，建立它们之间的映射关系
-        
-        影像表现:
-        {image_text}
-        
-        诊断结论:
-        {diagnosis_text}
-        
-        请按以下JSON格式返回结果:
-        {{
-          "影像发现与诊断映射": [
-            {{
-              "影像发现": "右肺上叶可见一枚约3cm大小的结节状软组织密度影，边缘毛糙，可见毛刺征、分叶征",
-              "对应诊断": "右肺上叶周围型肺癌"
-            }},
-            {{
-              "影像发现": "双肺散在多发小结节",
-              "对应诊断": "肺内多发转移"
-            }},
-            ...
-          ]
-        }}
-        
-        请确保每个映射都有明确的证据支持，不要添加推测的映射关系
-        """
+        # 如果任一输入为空，返回空列表
+        if not structures or not features or not diagnoses:
+            logger.warning("影像发现或诊断为空，无法建立映射")
+            return []
+            
+        # 构建提示词
+        prompt = self.prompt_manager.get_prompt(
+            "mapping",
+            "default",
+            structures=json.dumps(structures, ensure_ascii=False),
+            features=json.dumps(features, ensure_ascii=False),
+            diagnoses=json.dumps(diagnoses, ensure_ascii=False)
+        )
         
         # 保存提示词用于调试
         self.debug_info["影像诊断映射_提示词"] = prompt
         
         try:
+            # 调用LLM进行映射
             result = self.llm_client.extract_json(prompt)
-            # 保存模型响应用于调试
-            self.debug_info["影像诊断映射_响应"] = result
             
-            if isinstance(result, dict) and "影像发现与诊断映射" in result:
-                return result
-            elif isinstance(result, dict) and "error" in result:
-                logger.error(f"构建影像诊断映射失败: {result['error']}")
-                return {"影像发现与诊断映射": []}
-            else:
-                return {"影像发现与诊断映射": []}
+            # 提取映射列表 - 增加格式兼容性处理
+            if isinstance(result, dict) and "映射关系" in result:
+                mappings = result["映射关系"]
+                return mappings
+            elif isinstance(result, list):
+                # 如果返回的是示例格式，则自动生成有意义的映射
+                if len(result) == 1 and '影像发现' in result[0] and result[0]['影像发现'] == '具体影像表现描述':
+                    logger.info("检测到示例格式，自动生成映射关系")
+                    
+                    # 生成影像发现和诊断的映射关系
+                    mappings = self._generate_mappings(structures, features, diagnoses)
+                    logger.info(f"自动生成了 {len(mappings)} 个映射关系")
+                    return mappings
+                # 对于正常的列表结果，直接返回
+                elif len(result) > 0 and isinstance(result[0], dict):
+                    # 验证是否是有效的映射关系
+                    valid_mappings = []
+                    for mapping in result:
+                        if '影像发现' in mapping and '对应诊断' in mapping:
+                            valid_mappings.append(mapping)
+                    
+                    if valid_mappings:
+                        logger.info(f"兼容处理：直接从列表提取映射关系，找到 {len(valid_mappings)} 个有效映射")
+                        return valid_mappings
+            
+            # 如果没有找到有效映射，自动生成
+            logger.warning(f"影像诊断映射结果格式错误，尝试自动生成: {result}")
+            mappings = self._generate_mappings(structures, features, diagnoses)
+            logger.info(f"自动生成了 {len(mappings)} 个映射关系")
+            return mappings
+                
         except Exception as e:
-            logger.error(f"构建影像诊断映射时发生错误: {str(e)}")
-            self.debug_info["影像诊断映射_错误"] = str(e)
-            return {"影像发现与诊断映射": []}
-    
-    def analyze_single_report(self, image_text: str, diagnosis_text: str) -> Dict[str, Any]:
+            logger.error(f"影像诊断映射失败: {str(e)}")
+            return []
+            
+    def extract_report_structure(self, report_text: str, diagnosis_text: str = "") -> Dict[str, Any]:
         """
-        全面分析单份报告
+        从报告中提取完整的结构化信息
         
         参数:
-            image_text: 影像表现文本
+            report_text: 影像表现文本
             diagnosis_text: 诊断结论文本
-        
+            
         返回:
-            完整的分析结果
+            结构化报告数据
         """
-        logger.info("===== 开始分析报告 =====")
-        logger.info(f"LLM客户端配置: 提供商={self.llm_client.provider}, 模型={self.llm_client.model}")
-        
-        # 分析步骤列表
-        steps = [
-            "提取报告部分",
-            "提取解剖结构",
-            "提取病变特征",
-            "提取诊断信息",
-            "构建映射关系"
-        ]
-        
-        # 清空调试信息
-        self.debug_info = {
-            "原始数据": {
-                "影像表现": image_text,
-                "诊断结论": diagnosis_text
-            },
-            "模型信息": {
-                "提供商": self.llm_client.provider,
-                "模型": self.llm_client.model,
-                "温度": getattr(self.llm_client, 'temperature', '默认'),
-                "最大输出标记": getattr(self.llm_client, 'max_tokens', '默认')
-            },
-            "分析耗时": {}
-        }
-        
+        start_time = time.time()
         result = {
-            "原始数据": {
-                "影像表现": image_text,
-                "诊断结论": diagnosis_text
-            },
-            "结构化数据": {}
+            "解剖结构": [],
+            "病变特征": [],
+            "诊断信息": [],
+            "映射关系": [],
+            "调试信息": {}
         }
         
         try:
-            # 1. 提取报告部分
+            # 提取解剖结构
             if self.status_callback:
-                self.status_callback(steps[0], 0)
+                self.status_callback("提取解剖结构", 1)
                 
-            step_start_time = time.time()
-            logger.info("1. 提取报告部分...")
-            report_sections = self.extract_report_sections(image_text)
-            result["结构化数据"]["报告部分"] = report_sections
-            step_time = time.time() - step_start_time
-            self.debug_info["分析耗时"]["提取报告部分"] = f"{step_time:.2f}秒"
-            logger.info(f"   提取到 {len(report_sections)} 个报告部分 (耗时: {step_time:.2f}秒)")
+            structures = self.extract_anatomical_structures(report_text)
+            result["解剖结构"] = structures
             
-            # 2. 提取解剖结构
+            # 提取病变特征
             if self.status_callback:
-                self.status_callback(steps[1], 1)
+                self.status_callback("提取病变特征", 2)
                 
-            step_start_time = time.time()
-            logger.info("2. 提取解剖结构...")
-            anatomical_structures = self.extract_anatomical_structures(image_text)
-            result["结构化数据"]["解剖结构"] = anatomical_structures
-            step_time = time.time() - step_start_time
-            self.debug_info["分析耗时"]["提取解剖结构"] = f"{step_time:.2f}秒"
-            logger.info(f"   提取到 {len(anatomical_structures)} 个解剖结构 (耗时: {step_time:.2f}秒)")
+            features = self.extract_lesion_features(report_text, structures)
+            result["病变特征"] = features
             
-            # 3. 提取病变特征
-            if self.status_callback:
-                self.status_callback(steps[2], 2)
+            # 提取诊断信息
+            if diagnosis_text:
+                if self.status_callback:
+                    self.status_callback("提取诊断信息", 3)
+                    
+                diagnoses = self.extract_diagnosis_info(diagnosis_text)
+                result["诊断信息"] = diagnoses
                 
-            step_start_time = time.time()
-            logger.info("3. 提取病变特征...")
-            lesion_features = self.extract_lesion_features(image_text)
-            result["结构化数据"]["病变特征"] = lesion_features
-            step_time = time.time() - step_start_time
-            self.debug_info["分析耗时"]["提取病变特征"] = f"{step_time:.2f}秒"
-            logger.info(f"   提取到 {len(lesion_features)} 个病变特征 (耗时: {step_time:.2f}秒)")
+                # 建立映射关系
+                if structures and features and diagnoses:
+                    if self.status_callback:
+                        self.status_callback("建立映射关系", 4)
+                        
+                    mappings = self.map_findings_to_diagnosis(structures, features, diagnoses)
+                    result["映射关系"] = mappings
             
-            # 4. 提取诊断信息
-            if self.status_callback:
-                self.status_callback(steps[3], 3)
-                
-            step_start_time = time.time()
-            logger.info("4. 提取诊断信息...")
-            diagnoses = self.extract_diagnoses(diagnosis_text)
-            result["结构化数据"]["诊断信息"] = diagnoses
-            step_time = time.time() - step_start_time
-            self.debug_info["分析耗时"]["提取诊断信息"] = f"{step_time:.2f}秒"
-            logger.info(f"   提取到 {len(diagnoses)} 个诊断信息 (耗时: {step_time:.2f}秒)")
+            # 添加调试信息
+            result["调试信息"] = self.debug_info
             
-            # 5. 构建映射关系
-            if self.status_callback:
-                self.status_callback(steps[4], 4)
-                
-            step_start_time = time.time()
-            logger.info("5. 构建映射关系...")
-            mapping = self.build_image_diagnosis_mapping(image_text, diagnosis_text)
-            result["结构化数据"]["影像诊断映射"] = mapping
-            step_time = time.time() - step_start_time
-            self.debug_info["分析耗时"]["构建映射关系"] = f"{step_time:.2f}秒"
-            logger.info(f"   映射关系构建完成 (耗时: {step_time:.2f}秒)")
+            # 添加性能指标
+            end_time = time.time()
+            result["处理时间"] = f"{end_time - start_time:.2f}秒"
             
-            logger.info("===== 报告分析完成 =====\n")
+            return result
+            
         except Exception as e:
-            logger.error(f"===== 报告分析出错: {str(e)} =====\n")
-            self.debug_info["分析错误"] = str(e)
-            # 出错时仍然返回部分结果
+            logger.error(f"结构化提取过程出错: {str(e)}")
+            
+            # 添加错误信息
+            result["错误信息"] = str(e)
+            result["调试信息"] = self.debug_info
+            
+            return result
+            
+    def _generate_mappings(self, structures: List[Dict[str, str]], features: List[Dict[str, Any]], diagnoses: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+        """
+        自动生成影像发现和诊断的映射关系
         
-        # 将调试信息添加到结果中
-        result["调试信息"] = self.debug_info
+        参数:
+            structures: 解剖结构列表
+            features: 病变特征列表
+            diagnoses: 诊断信息列表
+            
+        返回:
+            映射关系列表
+        """
+        mappings = []
         
-        return result
+        # 如果没有诊断或特征，返回空列表
+        if not features or not diagnoses:
+            return mappings
+            
+        # 对每个诊断，查找相关的影像特征
+        for diagnosis in diagnoses:
+            if not isinstance(diagnosis, dict) or "描述" not in diagnosis:
+                continue
+                
+            diagnosis_text = diagnosis.get("描述", "")
+            if not diagnosis_text:
+                continue
+                
+            # 找到相关的特征
+            related_features = []
+            for feature in features:
+                if not isinstance(feature, dict):
+                    continue
+                    
+                # 获取特征信息
+                feature_name = feature.get("名称", "")
+                feature_detail = feature.get("特征", {})
+                
+                # 获取特征的解剖位置
+                location = ""
+                if isinstance(feature_detail, dict) and "解剖位置" in feature_detail:
+                    location = feature_detail["解剖位置"]
+                    
+                # 判断是否相关(简单版：判断解剖位置或特征名称是否出现在诊断中)
+                if location and location in diagnosis_text:
+                    related_features.append(feature)
+                elif feature_name and feature_name in diagnosis_text:
+                    related_features.append(feature)
+            
+            # 如果找到相关特征，创建映射
+            if related_features:
+                for feature in related_features:
+                    mapping = {
+                        "影像发现": feature.get("名称", "") + "的特征",
+                        "对应诊断": diagnosis_text,
+                        "映射置信度": "高" if feature.get("名称", "") in diagnosis_text else "中"
+                    }
+                    mappings.append(mapping)
+            # 如果没有找到相关特征，但有诊断，创建一个带“低”置信度的映射
+            elif features:
+                mapping = {
+                    "影像发现": "综合影像表现",
+                    "对应诊断": diagnosis_text,
+                    "映射置信度": "低"
+                }
+                mappings.append(mapping)
+                
+        return mappings
+        
+    def set_status_callback(self, callback: Callable):
+        """
+        设置状态回调函数
+        
+        参数:
+            callback: 回调函数，接受步骤名称和步骤索引
+        """
+        self.status_callback = callback

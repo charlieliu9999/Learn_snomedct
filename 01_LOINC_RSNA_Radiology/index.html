@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOINC-RSNA放射学指南中文介绍</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
+            <h1>LOINC-RSNA放射学指南</h1>
+            <p class="subtitle">放射学检查订单和结果的统一术语标准</p>
+        </div>
+    </header>
+
+    <nav id="main-nav">
+        <div class="container">
+            <div class="nav-toggle" id="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#overview" class="nav-link">项目概述</a></li>
+                <li><a href="#concepts" class="nav-link">基本概念</a></li>
+                <li><a href="#model" class="nav-link">统一模型</a></li>
+                <li><a href="#codes" class="nav-link">代码示例</a></li>
+                <li><a href="#history" class="nav-link">历史背景</a></li>
+                <li><a href="#applications" class="nav-link">应用场景</a></li>
+                <li><a href="#challenges" class="nav-link">挑战与解决</a></li>
+                <li><a href="#figures" class="nav-link">参考图表</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section id="overview" class="section">
+            <div class="container">
+                <h2 class="section-title">项目概述</h2>
+                <div class="section-content">
+                    <div class="content-grid">
+                        <div class="text-content">
+                            <p>LOINC-RSNA放射学指南(LOINC/RSNA Radiology Playbook)是一个重要的国际标准化术语系统，由美国Regenstrief研究所和北美放射学会(RSNA)通过多年合作开发而成。该项目得到了美国国家生物医学成像和生物工程研究所(NIBIB)的资助支持，旨在为放射学检查的订单和结果提供通用的术语标准。</p>
+                            <p>这一统一术语系统解决了当前医疗机构在放射学领域面临的一个核心问题：尽管DICOM标准已在医院广泛应用并解决了医学图像存储和交换的结构问题，但每个放射科设施通常仍使用自己的命名法来标识所执行的成像程序。这种缺乏标准化的状况增加了数据交换和整合的难度，阻碍了健康信息交换中的图像和报告集成、辐射剂量基准测试、跨站点潜在可避免重复检查警报的开发，以及将成像信息用于研究等工作。</p>
+                            <p>LOINC-RSNA放射学指南通过提供统一的信息模型、术语和单一的治理流程，为放射学订单和结果术语创建了一个普遍适用的标准，大大促进了医疗信息的互操作性。</p>
+                        </div>
+                        <div class="image-content">
+                            <figure>
+                                <img src="radlex_playbook.png" alt="RadLex Playbook系列概览" class="section-image">
+                                <figcaption>RadLex Playbook系列概览</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="concepts" class="section">
+            <div class="container">
+                <h2 class="section-title">基本概念与术语</h2>
+                <div class="section-content">
+                    <div class="content-grid">
+                        <div class="text-content">
+                            <h3 class="subsection-title">核心术语定义</h3>
+                            <div class="term-list">
+                                <div class="term-item">
+                                    <h4>LOINC</h4>
+                                    <p>Logical Observation Identifiers, Names, and Codes，一种国际通用的医疗观察和测量标准化术语，由Regenstrief研究所维护，目前已在全球170多个国家使用。</p>
+                                </div>
+                                <div class="term-item">
+                                    <h4>RadLex</h4>
+                                    <p>RSNA开发的放射学术语词典，包含超过75,000个术语，专门用于索引和检索放射学信息资源，特别是与放射学报告相关的临床内容。</p>
+                                </div>
+                                <div class="term-item">
+                                    <h4>RadLex Playbook</h4>
+                                    <p>RSNA开发的标准系统，用于基于定义成像检查的元素来命名放射学程序。</p>
+                                </div>
+                                <div class="term-item">
+                                    <h4>RPID</h4>
+                                    <p>RadLex Playbook Identifier，RadLex Playbook中每个放射学程序的唯一标识码。</p>
+                                </div>
+                                <div class="term-item">
+                                    <h4>统一模型</h4>
+                                    <p>LOINC和RSNA联合开发的放射学术语模型，结合了两个系统的优点，为放射学程序名称提供标准化的结构和命名规则。</p>
+                                </div>
+                            </div>
+
+                            <h3 class="subsection-title">项目主要目标</h3>
+                            <ol class="goal-list">
+                                <li>开发放射学程序名称的统一模型，使属性以可扩展的值集表示</li>
+                                <li>将现有LOINC程序代码转换为统一模型表示</li>
+                                <li>创建统一模型中使用的所有属性值与RadLex中等效概念的映射</li>
+                                <li>创建RadLex Core Playbook中现有程序代码与LOINC中相应代码的映射</li>
+                                <li>开发统一术语管理的单一集成治理流程</li>
+                                <li>公开分发术语制品</li>
+                            </ol>
+                        </div>
+                        <div class="image-content">
+                            <figure>
+                                <img src="radlex_procedures.png" alt="RadLex放射学程序标准化流程图" class="section-image">
+                                <figcaption>RadLex放射学程序标准化流程图</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="model" class="section">
+            <div class="container">
+                <h2 class="section-title">统一模型结构</h2>
+                <div class="section-content">
+                    <p class="section-intro">LOINC-RSNA统一模型采用了一种结构化的方法来描述放射学程序，包含多个核心属性及其子属性。这些属性作为构建块，用于构造几种类型的标准名称，包括完全指定的名称、长名称和短名称。</p>
+                    
+                    <h3 class="subsection-title">核心属性</h3>
+                    <div class="attributes-container">
+                        <div class="attribute-card">
+                            <h4>模态 (Modality)</h4>
+                            <p>用于表示获取成像信息的设备，主要由DICOM模态代码的两个字母子集组成（如CT、MR、XR等），可包含模态子类型(如CT.angio表示血管造影CT)。</p>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>解剖位置 (Anatomic Location)</h4>
+                            <p>指定被成像的身体部位或区域，包含两个子属性：</p>
+                            <ul>
+                                <li><strong>区域成像(Region Imaged)</strong>: 粗粒度描述被成像的区域</li>
+                                <li><strong>成像焦点(Imaging Focus)</strong>: 更细粒度描述成像的特定目标结构</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>视图 (View)</h4>
+                            <p>指示患者在图像中的方向，可能反映患者位置和X射线束方向的组合，包含可选子属性：</p>
+                            <ul>
+                                <li><strong>聚合(Aggregation)</strong>: 描述所执行成像的程度</li>
+                                <li><strong>视图类型(View Type)</strong>: 命名特定视图，如侧位或俯卧位</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>时序 (Timing)</h4>
+                            <p>表示相对于某个事件的时间关系，用于描述在特定时间点或间隔进行的成像。</p>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>操作 (Maneuver)</h4>
+                            <p>表示为获取特定图像而执行的患者移动或其他动作，例如屏气、瓦氏操作等。</p>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>药物 (Pharmaceutical)</h4>
+                            <p>表示在成像过程中使用的对比剂或其他药物，包括给药途径、剂量、时间等信息。</p>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>检查原因 (Reason for Exam)</h4>
+                            <p>表示进行检查的医学原因或临床指征，帮助区分具有相同技术但不同临床目的的检查。</p>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>引导 (Guidance)</h4>
+                            <p>用于描述图像引导程序，包含执行的过程类型和目标物体。</p>
+                        </div>
+                        
+                        <div class="attribute-card">
+                            <h4>主体 (Subject)</h4>
+                            <p>指定检查的对象，例如胎儿或妊娠，用于区分针对不同受试者的检查。</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="subsection-title">语法和操作符</h3>
+                    <div class="operators-table-container">
+                        <table class="operators-table">
+                            <thead>
+                                <tr>
+                                    <th>操作符</th>
+                                    <th>用法</th>
+                                    <th>示例</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="operator">.</td>
+                                    <td>用于指定属性或属性组件的细化</td>
+                                    <td>CT.angio (血管造影CT)</td>
+                                </tr>
+                                <tr>
+                                    <td class="operator">+</td>
+                                    <td>用于组合原子，具有AND语义</td>
+                                    <td>Chest + Abdomen (胸部和腹部)</td>
+                                </tr>
+                                <tr>
+                                    <td class="operator">&gt;</td>
+                                    <td>分隔区域成像和解剖焦点</td>
+                                    <td>Abdomen > Liver (腹部的肝脏)</td>
+                                </tr>
+                                <tr>
+                                    <td class="operator">&</td>
+                                    <td>分隔多个区域中成像多个解剖位置</td>
+                                    <td>Chest>Heart & Abdomen>Liver</td>
+                                </tr>
+                                <tr>
+                                    <td class="operator">^</td>
+                                    <td>分隔操作属性与视图属性</td>
+                                    <td>Valsalva maneuver ^ PA (瓦氏操作后的PA位)</td>
+                                </tr>
+                                <tr>
+                                    <td class="operator">()</td>
+                                    <td>指示操作仅适用于视图值的子集</td>
+                                    <td>Inspiration ^ (PA)</td>
+                                </tr>
+                                <tr>
+                                    <td class="operator">&&</td>
+                                    <td>指示并行性</td>
+                                    <td>W contrast && WO contrast</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="operator-priority">操作符优先级从高到低：<strong>"."</strong>, <strong>"+"</strong>, <strong>"&gt;"</strong>, <strong>"&"</strong>, <strong>"^"</strong>, <strong>"()"</strong>, <strong>"&&"</strong>。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="codes" class="section">
+            <div class="container">
+                <h2 class="section-title">代码体系与示例</h2>
+                <div class="section-content">
+                    <p class="section-intro">LOINC-RSNA放射学指南使用LOINC代码作为程序的主要标识符，并将这些代码与RadLex术语中的概念链接起来，从而实现术语的统一。</p>
+                    
+                    <div class="code-examples">
+                        <div class="code-example">
+                            <div class="code-header">
+                                <h3>CT头部扫描</h3>
+                                <span class="loinc-code">LOINC 24725-4</span>
+                            </div>
+                            <div class="code-body">
+                                <p class="code-name">CT Head WO contrast</p>
+                                <div class="code-attributes">
+                                    <div class="attribute"><span>模态</span><span>CT</span></div>
+                                    <div class="attribute"><span>解剖位置</span><span>Head (头部)</span></div>
+                                    <div class="attribute"><span>药物</span><span>WO (Without) contrast (无对比剂)</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="code-example">
+                            <div class="code-header">
+                                <h3>MRI腹部扫描</h3>
+                                <span class="loinc-code">LOINC 24621-5</span>
+                            </div>
+                            <div class="code-body">
+                                <p class="code-name">MRI Abdomen W contrast IV</p>
+                                <div class="code-attributes">
+                                    <div class="attribute"><span>模态</span><span>MR</span></div>
+                                    <div class="attribute"><span>解剖位置</span><span>Abdomen (腹部)</span></div>
+                                    <div class="attribute"><span>药物</span><span>W (With) contrast IV (静脉对比剂)</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="code-example">
+                            <div class="code-header">
+                                <h3>胸部X光</h3>
+                                <span class="loinc-code">LOINC 36643-5</span>
+                            </div>
+                            <div class="code-body">
+                                <p class="code-name">XR Chest PA and Lateral</p>
+                                <div class="code-attributes">
+                                    <div class="attribute"><span>模态</span><span>XR</span></div>
+                                    <div class="attribute"><span>解剖位置</span><span>Chest (胸部)</span></div>
+                                    <div class="attribute"><span>视图</span><span>PA and Lateral (后前位和侧位)</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="code-example">
+                            <div class="code-header">
+                                <h3>多区域解剖位置示例</h3>
+                                <span class="loinc-code">LOINC 30654-1</span>
+                            </div>
+                            <div class="code-body">
+                                <p class="code-name">MRA Chest & Abdomen W contrast IV</p>
+                                <div class="code-attributes">
+                                    <div class="attribute"><span>模态</span><span>MR.angio (MRA)</span></div>
+                                    <div class="attribute"><span>解剖位置</span><span>Chest + Abdomen (胸部和腹部)</span></div>
+                                    <div class="attribute"><span>药物</span><span>W contrast IV (静脉对比剂)</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="code-example">
+                            <div class="code-header">
+                                <h3>特定解剖焦点示例</h3>
+                                <span class="loinc-code">LOINC 30621-0</span>
+                            </div>
+                            <div class="code-body">
+                                <p class="code-name">CT Abdomen>Liver WO and W contrast IV</p>
+                                <div class="code-attributes">
+                                    <div class="attribute"><span>模态</span><span>CT</span></div>
+                                    <div class="attribute"><span>解剖位置</span><span>Abdomen > Liver (腹部的肝脏)</span></div>
+                                    <div class="attribute"><span>药物</span><span>WO and W contrast IV (无对比剂和静脉对比剂)</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history" class="section">
+            <div class="container">
+                <h2 class="section-title">历史发展与背景</h2>
+                <div class="section-content">
+                    <div class="timeline">
+                        <div class="timeline-phase">
+                            <h3 class="phase-title">独立发展阶段</h3>
+                            <div class="timeline-event">
+                                <div class="event-year">2000年</div>
+                                <div class="event-content">
+                                    <h4>LOINC放射学内容</h4>
+                                    <p>LOINC于2000年发布的版本1.0O中首次包含放射学程序代码。LOINC采用了其通常的方法，通过分析操作系统中名称的模式和粒度水平来推导命名模型。</p>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-year">2005年</div>
+                                <div class="event-content">
+                                    <h4>RadLex项目启动</h4>
+                                    <p>RSNA启动RadLex项目，旨在创建一个全面的放射学术语词典，用于索引和检索放射学信息资源。</p>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-year">2011年</div>
+                                <div class="event-content">
+                                    <h4>RadLex Playbook开发</h4>
+                                    <p>RadLex Playbook作为RSNA RadLex项目的子委员会开始开发，目标是提供一个基于定义成像检查的元素的放射学程序标准命名系统。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-phase">
+                            <h3 class="phase-title">统一合作阶段</h3>
+                            <div class="timeline-event">
+                                <div class="event-year">2013年</div>
+                                <div class="event-content">
+                                    <h4>合作协议达成</h4>
+                                    <p>Regenstrief研究所和RSNA达成协议，开始合作开发统一的放射学程序名称标准，将LOINC放射学内容和RadLex Playbook统一为一个集成术语。</p>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-year">2013-2015年</div>
+                                <div class="event-content">
+                                    <h4>第一阶段实施</h4>
+                                    <p>创建统一模型和治理流程，并为计算机断层扫描(CT)实现统一模型和映射，由NIBIB资助。</p>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-year">2016-2017年</div>
+                                <div class="event-content">
+                                    <h4>第二阶段实施</h4>
+                                    <p>将内容建模和映射工作扩展到所有其他放射成像模式和介入程序，基于第一阶段经验教训迭代改进统一模型。</p>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-year">2017年之后</div>
+                                <div class="event-content">
+                                    <h4>第三阶段实施</h4>
+                                    <p>将这项工作转变为两个组织的持续维护活动，确保术语的持续更新和改进。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="applications" class="section">
+            <div class="container">
+                <h2 class="section-title">实际应用场景</h2>
+                <div class="section-content">
+                    <p class="section-intro">LOINC-RSNA放射学指南已在多个领域展示了其价值，以下是一些主要应用场景：</p>
+                    
+                    <div class="applications-grid">
+                        <div class="application-card">
+                            <h3>医疗机构放射学部门标准化</h3>
+                            <p>许多医疗机构使用LOINC-RSNA放射学指南来标准化其放射学部门的程序名称，这有助于：</p>
+                            <ul>
+                                <li>改善工作流程优化</li>
+                                <li>收费管理</li>
+                                <li>辐射剂量追踪</li>
+                                <li>企业集成</li>
+                                <li>图像交换</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-card">
+                            <h3>软件实施案例</h3>
+                            <p>一项研究报告了一个大型三级医疗中心使用软件工具"RadMatch"实施LOINC-RSNA放射学指南的经验。该工具使用Python和模糊字符串匹配算法来自动化实施过程，结果显示：</p>
+                            <ul>
+                                <li>86%的本地CT程序可以分配适当的LOINC编号</li>
+                                <li>75%的本地MR程序可以分配适当的LOINC编号</li>
+                                <li>少部分程序只能部分映射或无法映射</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-card">
+                            <h3>健康信息交换应用</h3>
+                            <p>LOINC-RSNA放射学指南在健康信息交换(HIE)中的应用使不同医疗机构能够：</p>
+                            <ul>
+                                <li>使用一致的术语和代码共享放射学信息</li>
+                                <li>减少误解并提高数据质量</li>
+                                <li>整合来自多个来源的放射学信息</li>
+                                <li>便于跨机构的临床决策支持系统开发</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-card">
+                            <h3>辐射剂量监测</h3>
+                            <p>通过标准化放射学程序名称，医疗机构可以更有效地：</p>
+                            <ul>
+                                <li>跟踪和比较不同检查的辐射剂量</li>
+                                <li>建立辐射基准</li>
+                                <li>开发跨站点警报系统，避免不必要的重复检查</li>
+                                <li>优化患者安全和辐射防护实践</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="application-card">
+                            <h3>科研应用</h3>
+                            <p>标准化术语促进了放射学研究数据的整合和分析：</p>
+                            <ul>
+                                <li>便于多中心研究数据的整合</li>
+                                <li>提高研究结果的可比性</li>
+                                <li>促进大数据分析和人工智能应用</li>
+                                <li>支持循证医学和临床决策支持系统的发展</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="image-container">
+                        <figure>
+                            <img src="imaging_workflow.png" alt="放射学AI成像工作流" class="section-image">
+                            <figcaption>放射学AI成像工作流</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="section">
+            <div class="container">
+                <h2 class="section-title">挑战与解决方案</h2>
+                <div class="section-content">
+                    <p class="section-intro">在实施LOINC-RSNA放射学指南的过程中，医疗机构和系统开发者面临一系列挑战。以下是一些常见挑战及其解决方案：</p>
+                    
+                    <div class="challenges-container">
+                        <div class="challenge-card">
+                            <h3>术语差异</h3>
+                            <div class="challenge-content">
+                                <div class="challenge-desc">
+                                    <h4>挑战</h4>
+                                    <p>本地程序名称与LOINC-RSNA放射学指南中的标准化名称之间存在不一致。</p>
+                                </div>
+                                <div class="solution-desc">
+                                    <h4>解决方案</h4>
+                                    <ul>
+                                        <li>开发映射工具和同义词字典来帮助匹配本地术语与标准术语</li>
+                                        <li>使用自动化工具如RadMatch，结合模糊字符串匹配算法</li>
+                                        <li>由领域专家审查和验证映射结果</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h3>细节级别差异</h3>
+                            <div class="challenge-content">
+                                <div class="challenge-desc">
+                                    <h4>挑战</h4>
+                                    <p>本地程序名称可能比LOINC-RSNA放射学指南中的相应程序名称更具体或不太具体。</p>
+                                </div>
+                                <div class="solution-desc">
+                                    <h4>解决方案</h4>
+                                    <ul>
+                                        <li>根据具体情况逐个评估</li>
+                                        <li>对于更具体的本地术语，可以映射到适当的父级术语</li>
+                                        <li>对于不太具体的本地术语，可能需要结合多个LOINC代码</li>
+                                        <li>建立本地扩展规则，确保一致的映射实践</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h3>覆盖范围限制</h3>
+                            <div class="challenge-content">
+                                <div class="challenge-desc">
+                                    <h4>挑战</h4>
+                                    <p>LOINC-RSNA放射学指南可能缺少某些特定的放射学程序。</p>
+                                </div>
+                                <div class="solution-desc">
+                                    <h4>解决方案</h4>
+                                    <ul>
+                                        <li>向LOINC和RSNA提交新术语请求</li>
+                                        <li>创建临时本地映射，直到正式术语可用</li>
+                                        <li>参与社区反馈流程，帮助改进术语的覆盖范围</li>
+                                        <li>使用通用的"未指定"代码作为临时解决方案</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h3>系统集成和实施成本</h3>
+                            <div class="challenge-content">
+                                <div class="challenge-desc">
+                                    <h4>挑战</h4>
+                                    <p>将LOINC-RSNA放射学指南集成到现有系统需要大量资源和技术知识。</p>
+                                </div>
+                                <div class="solution-desc">
+                                    <h4>解决方案</h4>
+                                    <ul>
+                                        <li>分阶段实施，从最常用和最关键的程序开始</li>
+                                        <li>利用开源工具和社区资源</li>
+                                        <li>与供应商合作，确保系统支持标准术语</li>
+                                        <li>进行成本效益分析，突出长期收益</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h3>治理和维护</h3>
+                            <div class="challenge-content">
+                                <div class="challenge-desc">
+                                    <h4>挑战</h4>
+                                    <p>随着医学实践和技术的变化，术语需要持续更新和管理。</p>
+                                </div>
+                                <div class="solution-desc">
+                                    <h4>解决方案</h4>
+                                    <ul>
+                                        <li>建立本地术语治理委员会</li>
+                                        <li>定期同步最新的LOINC-RSNA放射学指南更新</li>
+                                        <li>开发自动化工具来监测和应用更新</li>
+                                        <li>参与LOINC和RSNA的社区讨论和反馈</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="figures" class="section">
+            <div class="container">
+                <h2 class="section-title">参考图表</h2>
+                <div class="section-content">
+                    <div class="figures-grid">
+                        <div class="figure-item">
+                            <figure>
+                                <img src="radlex_procedures.png" alt="RadLex放射学程序标准化流程图" class="figure-image">
+                                <figcaption>
+                                    <h3>RadLex放射学程序标准化流程图</h3>
+                                    <p>此图展示了放射学程序标准化的流程和组织结构，显示了如何将放射学检查的各个元素以标准化的方式组织起来。</p>
+                                </figcaption>
+                            </figure>
+                        </div>
+                        
+                        <div class="figure-item">
+                            <figure>
+                                <img src="radlex_playbook.png" alt="RadLex Playbook系列概览" class="figure-image">
+                                <figcaption>
+                                    <h3>RadLex Playbook系列概览</h3>
+                                    <p>这张图片展示了RSNA RadLex Playbook的系列概览，包括其在放射学术语标准化中的定位和应用场景。</p>
+                                </figcaption>
+                            </figure>
+                        </div>
+                        
+                        <div class="figure-item">
+                            <figure>
+                                <img src="imaging_workflow.png" alt="放射学AI成像工作流" class="figure-image">
+                                <figcaption>
+                                    <h3>放射学AI成像工作流</h3>
+                                    <p>此图展示了现代放射学AI辅助的成像工作流程，说明了标准化术语如何在整个流程中发挥作用，从图像获取、处理到结果解释的各个环节。</p>
+                                </figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>LOINC-RSNA放射学指南中文介绍</p>
+            <p>本资料仅供学习参考，内容基于LOINC与RSNA官方资料整理</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    
+    <!-- 语法自检 -->
+    <script>
+        // 语法自检
+        try {
+            console.log("语法检查通过");
+        } catch (error) {
+            console.error("语法错误:", error.message);
+        }
+        
+        // 功能验证
+        console.assert(typeof document.querySelector === 'function', "querySelector功能可用");
+        console.assert(typeof window.addEventListener === 'function', "事件监听功能可用");
+    </script>
+</body>
+</html>
