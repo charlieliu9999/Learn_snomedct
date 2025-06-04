@@ -285,6 +285,24 @@ class StructuredResultValidator:
         # 获取所有病变特征名称
         feature_names = [f.get("名称", "") for f in features if f.get("名称")]
         
+        # 如果映射为空但有病变特征和诊断，自动重构映射
+        if len(mappings) == 0 and len(feature_names) > 0 and diagnoses and len(diagnoses) > 0:
+            issues.append("严重问题：检测到病变特征和诊断信息，但影像诊断映射为空")
+            
+            # 为每个病变特征创建映射
+            main_diagnosis = diagnoses[0].get("描述", "") if diagnoses else "未知诊断"
+            
+            for feature_name in feature_names:
+                corrected_mapping = {
+                    "影像发现": feature_name,
+                    "对应诊断": main_diagnosis,
+                    "映射置信度": "中"
+                }
+                corrected_mappings.append(corrected_mapping)
+            
+            issues.append(f"自动重构了 {len(corrected_mappings)} 个影像诊断映射")
+        
+        # 处理现有映射
         for mapping in mappings:
             finding = mapping.get("影像发现", "")
             diagnosis = mapping.get("对应诊断", "")

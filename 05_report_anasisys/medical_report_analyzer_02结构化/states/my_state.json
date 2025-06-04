@@ -1,0 +1,16 @@
+{
+  "start_button": false,
+  "raw_data": null,
+  "state_desc": "我的处理状态",
+  "data_loaded": false,
+  "processed_data": null,
+  "llm_config": {
+    "provider": "ollama",
+    "model": "medgemma:latest",
+    "api_key": "nokey",
+    "api_base": "http://localhost:11434",
+    "temperature": 0.2,
+    "max_tokens": 2000
+  },
+  "state_name": "my_state"
+}
