@@ -10,6 +10,9 @@ import sys
 from pathlib import Path
 import json
 
+# NEW: Define path for field preferences file
+FIELD_PREFERENCES_FILE = Path(__file__).parent / "field_preferences.json"
+
 # 添加父目录到路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -23,6 +26,96 @@ if "raw_data" not in st.session_state:
 if "processed_data" not in st.session_state:
     st.session_state.processed_data = None
 
+# Session state for selected key columns (driven by UI interaction or auto-detect)
+if "findings_col" not in st.session_state:
+    st.session_state.findings_col = None
+if "impression_col" not in st.session_state:
+    st.session_state.impression_col = None
+
+# Session state for user-defined persistent preferences (loaded from file)
+if "user_preferred_findings_col" not in st.session_state:
+    st.session_state.user_preferred_findings_col = None
+if "user_preferred_impression_col" not in st.session_state:
+    st.session_state.user_preferred_impression_col = None
+if "preferences_loaded" not in st.session_state: 
+    st.session_state.preferences_loaded = False
+
+# Keywords for auto-detection
+FINDINGS_KEYWORDS_CN = ["影像所见", "影像学表现", "检查所见", "CT表现", "MR表现", "影像表现", "所见", "检查描述"]
+IMPRESSION_KEYWORDS_CN = ["诊断意见", "诊断结论", "印象", "结论", "诊断提示", "考虑", "分析意见"]
+FINDINGS_KEYWORDS_EN = ["findings", "image findings", "description", "radiologic findings", "imaging findings"]
+IMPRESSION_KEYWORDS_EN = ["impression", "conclusion", "diagnosis", "assessment", "summary", "interpretation"]
+
+ALL_FINDINGS_KEYWORDS = FINDINGS_KEYWORDS_CN + \
+                        [k.lower() for k in FINDINGS_KEYWORDS_EN] + \
+                        [k.title() for k in FINDINGS_KEYWORDS_EN] + \
+                        [k.upper() for k in FINDINGS_KEYWORDS_EN]
+ALL_IMPRESSION_KEYWORDS = IMPRESSION_KEYWORDS_CN + \
+                          [k.lower() for k in IMPRESSION_KEYWORDS_EN] + \
+                          [k.title() for k in IMPRESSION_KEYWORDS_EN] + \
+                          [k.upper() for k in IMPRESSION_KEYWORDS_EN]
+
+# NEW: Helper function for auto-detection
+def auto_detect_column(column_names, keywords, current_selection=None):
+    """
+    Tries to detect a column based on keywords.
+    Prioritizes exact matches of keywords, then substring matches.
+    If a current_selection is provided and valid, it might be preferred or used as a fallback.
+    Returns the column name or None.
+    """
+    if not column_names:
+        return None
+
+    # Convert column_names to lowercase for case-insensitive comparison
+    column_names_lower_map = {col.lower(): col for col in column_names}
+    
+    # Exact keyword match (case insensitive)
+    for keyword in keywords:
+        if keyword.lower() in column_names_lower_map:
+            return column_names_lower_map[keyword.lower()]
+            
+    # Substring match (case insensitive)
+    for col_name in column_names:
+        col_name_lower = col_name.lower()
+        for keyword in keywords:
+            if keyword.lower() in col_name_lower:
+                return col_name
+    
+    # If a valid current selection exists, could return it here, or handle outside.
+    # For now, if no keyword match, return None from detection.
+    return None
+
+# Function to load field preferences
+
+# Function to load field preferences
+def load_field_preferences():
+    if FIELD_PREFERENCES_FILE.exists():
+        try:
+            with open(FIELD_PREFERENCES_FILE, "r", encoding="utf-8") as f:
+                prefs = json.load(f)
+                st.session_state.user_preferred_findings_col = prefs.get("preferred_findings_col")
+                st.session_state.user_preferred_impression_col = prefs.get("preferred_impression_col")
+        except Exception: # Silently ignore errors during preference loading
+            pass
+    st.session_state.preferences_loaded = True
+
+# Function to save field preferences
+def save_field_preferences():
+    prefs_to_save = {
+        "preferred_findings_col": st.session_state.get("findings_col"),
+        "preferred_impression_col": st.session_state.get("impression_col")
+    }
+    try:
+        with open(FIELD_PREFERENCES_FILE, "w", encoding="utf-8") as f:
+            json.dump(prefs_to_save, f, ensure_ascii=False, indent=4)
+        # Update the session state for loaded preferences to reflect immediate save
+        st.session_state.user_preferred_findings_col = prefs_to_save["preferred_findings_col"]
+        st.session_state.user_preferred_impression_col = prefs_to_save["preferred_impression_col"]
+    except Exception as e:
+        st.error(f"保存字段偏好失败: {e}")
+
+
+
 # 导入绘图工具
 from utils.plot_utils import create_pie_chart, create_bar_chart
 
@@ -32,6 +125,8 @@ from utils.data_processor import (
     load_excel_data, clean_dataframe, extract_basic_stats, 
     get_report_sections, save_processed_data, load_processed_data
 )
+
+
 
 st.set_page_config(
     page_title=f"{config.APP_TITLE} - 数据探索",
@@ -58,51 +153,35 @@ if data_source == "默认数据文件":
                 df = load_excel_data(config.DEFAULT_DATA_PATH)
                 st.session_state.raw_data = df
                 st.session_state.data_loaded = True
+                st.session_state.processed_data = None # Reset processed data
+                st.session_state.findings_col = None # Reset for auto-detection
+                st.session_state.impression_col = None # Reset for auto-detection
                 st.success(f"成功加载 {len(df)} 条报告数据！")
             except Exception as e:
                 st.error(f"加载数据失败: {str(e)}")
                 st.session_state.data_loaded = False
 
 elif data_source == "本地数据文件":
-    # 添加两种选择方式
-    selection_method = st.sidebar.radio(
-        "选择方式",
-        ["输入路径", "选择目录"]
+    uploaded_file = st.sidebar.file_uploader(
+        "上传本地Excel文件", 
+        type=["xlsx", "xls"],
+        help="请上传包含医学影像报告的Excel文件 (.xlsx 或 .xls)。系统将从此文件加载数据进行分析。"
     )
     
-    file_path = ""
-    
-    if selection_method == "输入路径":
-        file_path = st.sidebar.text_input("输入本地Excel文件路径", "/Users/charlieliu/Desktop/华西-报告质控/胸部CT报告-0401.xlsx")
-    else:  # 选择目录
-        # 先选择目录
-        dir_path = st.sidebar.text_input("输入目录路径", "/Users/charlieliu/Desktop/华西-报告质控")
-        
-        if dir_path and os.path.isdir(dir_path):
-            # 列出目录中的Excel文件
-            excel_files = [f for f in os.listdir(dir_path) if f.endswith(('.xlsx', '.xls'))]
-            if excel_files:
-                selected_file = st.sidebar.selectbox("选择Excel文件", excel_files)
-                if selected_file:
-                    file_path = os.path.join(dir_path, selected_file)
-            else:
-                st.sidebar.warning("指定目录下没有Excel文件")
-        elif dir_path:
-            st.sidebar.error(f"目录不存在: {dir_path}")
-    
-    if file_path:
-        if st.sidebar.button("加载本地数据", key="load_local"):
-            with st.spinner("正在加载本地数据..."):
+    if uploaded_file is not None:
+        # 使用新的 key "load_local_uploaded" 避免与旧按钮冲突 (如果旧代码意外残留)
+        if st.sidebar.button("加载上传的数据", key="load_local_uploaded"): 
+            with st.spinner("正在加载上传的本地数据..."):
                 try:
-                    # 检查文件是否存在
-                    if not os.path.exists(file_path):
-                        st.sidebar.error(f"文件不存在: {file_path}")
-                    else:
-                        st.sidebar.info(f"正在读取文件: {file_path}")
-                        df = pd.read_excel(file_path)
-                        st.session_state.raw_data = df
-                        st.session_state.data_loaded = True
-                        st.success(f"成功加载 {len(df)} 条报告数据！")
+                    st.sidebar.info(f"正在读取上传的文件: {uploaded_file.name}")
+                    # uploaded_file 是一个内存中的类文件对象，pandas可以直接读取
+                    df = pd.read_excel(uploaded_file) 
+                    st.session_state.raw_data = df
+                    st.session_state.data_loaded = True
+                    st.session_state.processed_data = None # 清除旧的处理数据
+                    st.session_state.findings_col = None # Reset for auto-detection
+                    st.session_state.impression_col = None # Reset for auto-detection
+                    st.success(f"成功加载 {len(df)} 条报告数据！ (来自: {uploaded_file.name})")
                 except Exception as e:
                     st.error(f"加载数据失败: {str(e)}")
                     st.session_state.data_loaded = False
@@ -119,8 +198,10 @@ elif data_source == "已处理数据":
                     file_path = config.PROCESSED_DATA_DIR / selected_file
                     df = load_processed_data(file_path)
                     st.session_state.processed_data = df
-                    st.session_state.raw_data = df
+                    st.session_state.raw_data = df # Also load into raw_data if it's the base
                     st.session_state.data_loaded = True
+                    st.session_state.findings_col = None # Reset for auto-detection
+                    st.session_state.impression_col = None # Reset for auto-detection
                     st.success(f"成功加载 {len(df)} 条报告数据！")
                 except Exception as e:
                     st.error(f"加载数据失败: {str(e)}")
@@ -230,6 +311,123 @@ else:
         else:
             st.info("数据完整，无缺失值")
     
+    # REVISED: Section for defining key report fields with corrected strings
+    st.markdown("### 🎯 关键字段定义")
+    report_columns = list(data_to_display.columns)
+    
+    options_for_selectbox = [""] if not report_columns else report_columns
+    default_idx = 0
+
+    # Determine initial selections based on preferences and auto-detection
+    # This logic ensures that session_state.findings_col and session_state.impression_col are set
+    # before the selectboxes are rendered, using the priority:
+    # 1. User's loaded preferences (if valid in current columns)
+    # 2. Auto-detected keywords
+    # (If a user manually changes a selectbox, that value is stored in session_state and will be used directly
+    #  by the selectbox's `index` in subsequent reruns, unless data is reloaded which resets these.)
+
+    # Reset to None only if data just loaded (indicated by findings_col being None from load block)
+    # This allows user's current session changes to persist until next data load.
+    # The logic for resetting findings_col/impression_col to None is already in data loading blocks.
+
+    current_findings_val = st.session_state.get("findings_col")
+    current_impression_val = st.session_state.get("impression_col")
+    
+    # Attempt to set from preferences if not already set by user in this session or if current is invalid
+    pref_f = st.session_state.get("user_preferred_findings_col")
+    if pref_f and pref_f in report_columns:
+        if current_findings_val is None or current_findings_val not in report_columns:
+            st.session_state.findings_col = pref_f
+            current_findings_val = pref_f # update for immediate use
+
+    pref_i = st.session_state.get("user_preferred_impression_col")
+    if pref_i and pref_i in report_columns and pref_i != current_findings_val: # Ensure different from findings if findings is set
+        if current_impression_val is None or current_impression_val not in report_columns or current_impression_val == current_findings_val:
+            st.session_state.impression_col = pref_i
+            current_impression_val = pref_i
+
+    # Fallback to auto-detection if preferences didn't apply or were not sufficient
+    if st.session_state.get("findings_col") is None or st.session_state.get("findings_col") not in report_columns:
+        st.session_state.findings_col = auto_detect_column(report_columns, ALL_FINDINGS_KEYWORDS)
+
+    impression_candidates = [col for col in report_columns if col != st.session_state.get("findings_col")]
+    if not impression_candidates: impression_candidates = report_columns # Handle if only one col or findings_col is None
+
+    if st.session_state.get("impression_col") is None or \
+       st.session_state.get("impression_col") not in report_columns or \
+       st.session_state.get("impression_col") == st.session_state.get("findings_col"):
+        st.session_state.impression_col = auto_detect_column(impression_candidates, ALL_IMPRESSION_KEYWORDS)
+
+
+    # Determine default index for selectboxes using the now-set session_state values
+    try:
+        findings_default_idx = report_columns.index(st.session_state.findings_col) if st.session_state.findings_col in report_columns else default_idx
+    except ValueError:
+        findings_default_idx = default_idx
+
+    try:
+        # Attempt to make impression default different if findings is already set and they are the same
+        temp_impression_default_val = st.session_state.impression_col
+        if temp_impression_default_val == st.session_state.findings_col and st.session_state.findings_col is not None and len(report_columns) > 1:
+            if findings_default_idx + 1 < len(report_columns):
+                temp_impression_default_val = report_columns[(findings_default_idx + 1)]
+            elif findings_default_idx -1 >= 0 : # try previous if next is out of bounds
+                 temp_impression_default_val = report_columns[(findings_default_idx - 1)]
+            # If still same (e.g. only 1 or 2 columns and one is picked), it's okay, warning will show.
+        
+        impression_default_idx = report_columns.index(temp_impression_default_val) if temp_impression_default_val in report_columns else default_idx
+        if impression_default_idx == findings_default_idx and len(report_columns) > 1 : # Final check if they are identical
+            impression_default_idx = (default_idx + 1) % len(report_columns) if len(report_columns) > 0 else 0
+
+
+    except ValueError:
+        impression_default_idx = (default_idx + 1 if len(report_columns) > 1 else default_idx)
+    
+    if not report_columns: # Ensure indices are valid if no columns
+        findings_default_idx = 0
+        impression_default_idx = 0
+    
+    # Ensure indices are within bounds if list is very small
+    if findings_default_idx >= len(options_for_selectbox): findings_default_idx = 0
+    if impression_default_idx >= len(options_for_selectbox): impression_default_idx = 0
+
+
+    selected_findings_col = st.selectbox(
+        label="1. 选择“影像表现”字段:",
+        options=options_for_selectbox,
+        index=findings_default_idx,
+        help="选择包含患者详细影像学检查描述文本的列。",
+        key="sb_findings_col"
+    )
+    if report_columns:
+      st.session_state.findings_col = selected_findings_col
+
+    selected_impression_col = st.selectbox(
+        label="2. 选择“诊断结论”字段:",
+        options=options_for_selectbox,
+        index=impression_default_idx,
+        help="选择包含医生基于影像表现给出的诊断意见或结论文本的列。",
+        key="sb_impression_col"
+    )
+    if report_columns:
+      st.session_state.impression_col = selected_impression_col
+
+    if st.session_state.get("findings_col") and st.session_state.get("impression_col"):
+        if st.session_state.findings_col == st.session_state.impression_col and report_columns and len(report_columns) > 1 :
+            warning_text = f"“影像表现”和“诊断结论”不应选择同一列 ('{st.session_state.findings_col}'). 请分别指定."
+            st.warning(warning_text)
+        else:
+            success_text = f"已指定关键字段：影像表现列 = **'{st.session_state.findings_col}'**，诊断结论列 = **'{st.session_state.impression_col}'**"
+            st.success(success_text)
+    elif report_columns:
+        st.info("请在上方选择或确认“影像表现”和“诊断结论”对应的列.")
+    
+    # Add Save Preferences button
+    if report_columns and st.session_state.get("findings_col") and st.session_state.get("impression_col"):
+        if st.button("💾 保存当前字段选择为偏好", key="save_field_prefs_button"):
+            save_field_preferences()
+            st.toast("字段选择偏好已成功保存!", icon="✅")
+    
     # 数据列选择器
     st.markdown("### 🔍 数据浏览")
     
@@ -242,13 +440,25 @@ else:
     if column_selector:
         st.dataframe(data_to_display[column_selector].head(10))
     
-    # 提取基本统计信息
+    # 增强的数据统计分析
     st.markdown("### 📈 数据统计分析")
     
-    with st.expander("查看基本统计信息"):
+    # 基本统计信息
+    with st.expander("查看基本统计信息", expanded=True):
         stats = extract_basic_stats(data_to_display)
         
-        st.write(f"报告总数: {stats['报告总数']}")
+        # 创建三列布局显示核心指标
+        metric_col1, metric_col2, metric_col3 = st.columns(3)
+        
+        with metric_col1:
+            st.metric("报告总数", stats['报告总数'])
+        
+        with metric_col2:
+            completeness = (1 - data_to_display.isnull().sum().sum() / (data_to_display.shape[0] * data_to_display.shape[1])) * 100
+            st.metric("数据完整度", f"{completeness:.1f}%")
+        
+        with metric_col3:
+            st.metric("字段数量", data_to_display.shape[1])
         
         # 如果有诊断分布信息，显示诊断分布图
         if '前10位诊断分布' in stats:
@@ -261,6 +471,159 @@ else:
             # 使用我们的绘图工具创建饼图
             fig, ax = create_pie_chart(sizes, labels, title='主要诊断分布')
             st.pyplot(fig)
+    
+    # 详细字段分析
+    if st.session_state.get("findings_col") and st.session_state.get("impression_col"):
+        st.markdown("### 🔍 关键字段详细分析")
+        
+        # 字段选择器用于详细分析
+        analysis_field = st.selectbox(
+            "选择要详细分析的字段",
+            options=[st.session_state.findings_col, st.session_state.impression_col],
+            key="analysis_field_selector"
+        )
+        
+        if analysis_field and analysis_field in data_to_display.columns:
+            field_data = data_to_display[analysis_field].dropna()
+            
+            # 创建两列布局
+            analysis_col1, analysis_col2 = st.columns(2)
+            
+            with analysis_col1:
+                st.markdown(f"#### 📊 {analysis_field} - 统计指标")
+                
+                # 文本长度统计
+                text_lengths = field_data.str.len()
+                
+                # 显示统计指标
+                st.write("**文本长度统计:**")
+                length_stats = {
+                    "平均长度": f"{text_lengths.mean():.1f} 字符",
+                    "最短文本": f"{text_lengths.min()} 字符",
+                    "最长文本": f"{text_lengths.max()} 字符",
+                    "中位数长度": f"{text_lengths.median():.1f} 字符"
+                }
+                
+                for stat_name, stat_value in length_stats.items():
+                    st.write(f"- {stat_name}: {stat_value}")
+                
+                # 唯一值统计
+                st.write("**内容统计:**")
+                st.write(f"- 总记录数: {len(field_data)}")
+                st.write(f"- 唯一内容数: {field_data.nunique()}")
+                st.write(f"- 重复率: {((len(field_data) - field_data.nunique()) / len(field_data) * 100):.1f}%")
+                
+                # 空值统计
+                null_count = data_to_display[analysis_field].isnull().sum()
+                st.write(f"- 空值数量: {null_count}")
+                st.write(f"- 空值比例: {(null_count / len(data_to_display) * 100):.1f}%")
+            
+            with analysis_col2:
+                st.markdown(f"#### 📈 {analysis_field} - 可视化分析")
+                
+                # 文本长度分布直方图
+                if len(text_lengths) > 0:
+                    fig, ax = create_bar_chart(
+                        np.histogram(text_lengths, bins=20)[0],
+                        [f"{int(edge)}" for edge in np.histogram(text_lengths, bins=20)[1][:-1]],
+                        title=f"{analysis_field} 文本长度分布",
+                        xlabel="文本长度区间",
+                        ylabel="频次"
+                    )
+                    st.pyplot(fig)
+                
+                # 最常见的关键词（简单词频统计）
+                st.markdown("**常见关键词分析:**")
+                
+                # 简单的词频统计（基于空格和标点分割）
+                import re
+                all_text = " ".join(field_data.astype(str))
+                # 简单的中文分词（按标点和空格）
+                words = re.findall(r'[\u4e00-\u9fff]+', all_text)
+                words = [word for word in words if len(word) > 1]  # 过滤单字
+                
+                if words:
+                    from collections import Counter
+                    word_counts = Counter(words)
+                    top_words = word_counts.most_common(10)
+                    
+                    if top_words:
+                        word_df = pd.DataFrame(top_words, columns=['词语', '频次'])
+                        st.dataframe(word_df, use_container_width=True)
+                
+        # 字段内容预览
+        st.markdown("### 📋 字段内容预览")
+        
+        preview_col1, preview_col2 = st.columns(2)
+        
+        with preview_col1:
+            st.markdown(f"#### {st.session_state.findings_col}")
+            findings_data = data_to_display[st.session_state.findings_col].dropna()
+            if len(findings_data) > 0:
+                # 显示几个示例
+                sample_size = min(3, len(findings_data))
+                for i in range(sample_size):
+                    with st.expander(f"示例 {i+1}", expanded=(i==0)):
+                        st.write(findings_data.iloc[i])
+        
+        with preview_col2:
+            st.markdown(f"#### {st.session_state.impression_col}")
+            impression_data = data_to_display[st.session_state.impression_col].dropna()
+            if len(impression_data) > 0:
+                # 显示几个示例
+                sample_size = min(3, len(impression_data))
+                for i in range(sample_size):
+                    with st.expander(f"示例 {i+1}", expanded=(i==0)):
+                        st.write(impression_data.iloc[i])
+        
+        # 数据质量评估
+        st.markdown("### 🔬 数据质量评估")
+        
+        quality_col1, quality_col2 = st.columns(2)
+        
+        with quality_col1:
+            st.markdown("#### 数据完整性检查")
+            
+            # 检查关键字段的数据完整性
+            findings_completeness = (data_to_display[st.session_state.findings_col].notna().sum() / len(data_to_display)) * 100
+            impression_completeness = (data_to_display[st.session_state.impression_col].notna().sum() / len(data_to_display)) * 100
+            
+            completeness_data = {
+                '字段': [st.session_state.findings_col, st.session_state.impression_col],
+                '完整度(%)': [f"{findings_completeness:.1f}%", f"{impression_completeness:.1f}%"],
+                '状态': ['✅' if findings_completeness > 90 else '⚠️' if findings_completeness > 70 else '❌',
+                        '✅' if impression_completeness > 90 else '⚠️' if impression_completeness > 70 else '❌']
+            }
+            
+            st.dataframe(pd.DataFrame(completeness_data), use_container_width=True)
+        
+        with quality_col2:
+            st.markdown("#### 数据一致性检查")
+            
+            # 检查是否有异常短或异常长的文本
+            findings_lengths = data_to_display[st.session_state.findings_col].str.len().dropna()
+            impression_lengths = data_to_display[st.session_state.impression_col].str.len().dropna()
+            
+            # 异常检测（使用四分位数方法）
+            def detect_outliers(series):
+                Q1 = series.quantile(0.25)
+                Q3 = series.quantile(0.75)
+                IQR = Q3 - Q1
+                lower_bound = Q1 - 1.5 * IQR
+                upper_bound = Q3 + 1.5 * IQR
+                outliers = series[(series < lower_bound) | (series > upper_bound)]
+                return len(outliers), (len(outliers) / len(series)) * 100
+            
+            findings_outliers, findings_outlier_pct = detect_outliers(findings_lengths) if len(findings_lengths) > 0 else (0, 0)
+            impression_outliers, impression_outlier_pct = detect_outliers(impression_lengths) if len(impression_lengths) > 0 else (0, 0)
+            
+            outlier_data = {
+                '字段': [st.session_state.findings_col, st.session_state.impression_col],
+                '异常记录数': [findings_outliers, impression_outliers],
+                '异常比例': [f"{findings_outlier_pct:.1f}%", f"{impression_outlier_pct:.1f}%"]
+            }
+            
+            st.dataframe(pd.DataFrame(outlier_data), use_container_width=True)
     
     # 影像表现和诊断结论详细分析
     if "影像表现" in data_to_display.columns and "诊断结论" in data_to_display.columns:
@@ -312,3 +675,8 @@ else:
     with next_col2:
         if st.button("开始结构分析", use_container_width=True):
             st.switch_page("pages/02_structure_analyzer.py")
+
+
+# Load preferences when the script runs (once per session or if not already loaded)
+if not st.session_state.preferences_loaded:
+    load_field_preferences()
