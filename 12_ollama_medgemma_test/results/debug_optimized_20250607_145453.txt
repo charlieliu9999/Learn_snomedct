@@ -1,0 +1,61 @@
+=== 优化版调试信息 ===
+时间: 20250607_145453
+处理时间: 31.8秒
+响应长度: 1055
+
+=== 原始响应 ===
+```json
+{
+  "findings": [
+    {
+      "term": "胸廓塌陷",
+      "snomed": "267036007",
+      "site": "右侧胸廓",
+      "characteristics": ""
+    },
+    {
+      "term": "胸膜增厚",
+      "snomed": "267036007",
+      "site": "右侧胸膜",
+      "characteristics": "结节状, 明显"
+    },
+    {
+      "term": "胸膜强化",
+      "snomed": "267036007",
+      "site": "右侧胸膜",
+      "characteristics": "增强扫描, 不均匀, 明显"
+    },
+    {
+      "term": "液气胸",
+      "snomed": "418746001",
+      "site": "右侧胸腔",
+      "characteristics": "部分呈包裹性"
+    },
+    {
+      "term": "肺结节影",
+      "snomed": "276369003",
+      "site": "双肺",
+      "characteristics": "散在, 大小不等"
+    },
+    {
+      "term": "肺结节影",
+      "snomed": "276369003",
+      "site": "右肺中叶",
+      "characteristics": "较大者, 直径约1.8cm"
+    },
+    {
+      "term": "肺实变",
+      "snomed": "238664007",
+      "site": "右肺中叶",
+      "characteristics": ""
+    },
+    {
+      "term": "肺实变",
+      "snomed": "238664007",
+      "site": "右肺下叶",
+      "characteristics": ""
+    },
+    {
+      "term": "条索影",
+      "snomed": "276369003",
+      "site": "右肺中叶

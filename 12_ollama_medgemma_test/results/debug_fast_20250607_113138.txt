@@ -1,0 +1,249 @@
+=== 快速测试调试 ===
+时间: 20250607_113138
+处理时间: 128.5秒
+原始响应长度: 5437
+
+=== 响应内容 ===
+```json
+{
+  "findings": [
+    {
+      "term": "Chest wall collapse",
+      "snomed": "267036007",
+      "site": "Right chest wall",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Pleural thickening",
+      "snomed": "23488006",
+      "site": "Right pleura",
+      "size": "",
+      "characteristics": "Nodular, marked"
+    },
+    {
+      "term": "Pleural enhancement",
+      "snomed": "267036007",
+      "site": "Right pleura",
+      "size": "",
+      "characteristics": "Uneven, marked"
+    },
+    {
+      "term": "Pleural effusion",
+      "snomed": "418746001",
+      "site": "Right pleural space",
+      "size": "",
+      "characteristics": "Pneumothorax present"
+    },
+    {
+      "term": "Lung nodule",
+      "snomed": "25483006",
+      "site": "Both lungs",
+      "size": "Variable",
+      "characteristics": "Scattered"
+    },
+    {
+      "term": "Lung nodule",
+      "snomed": "25483006",
+      "site": "Right middle lobe",
+      "size": "1.8 cm",
+      "characteristics": "Largest"
+    },
+    {
+      "term": "Consolidation",
+      "snomed": "238664007",
+      "site": "Right middle lobe",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Consolidation",
+      "snomed": "238664007",
+      "site": "Right lower lobe",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Linear opacity",
+      "snomed": "276840006",
+      "site": "Right middle lobe",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Calcification",
+      "snomed": "267036007",
+      "site": "Right middle lobe",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Fibrous bands",
+      "snomed": "276840006",
+      "site": "Left upper lobe apical posterior segment",
+      "size": "",
+      "characteristics": "Slight"
+    },
+    {
+      "term": "Fibrous bands",
+      "snomed": "276840006",
+      "site": "Left lower lobe posterior basal segment",
+      "size": "",
+      "characteristics": "Slight"
+    },
+    {
+      "term": "Bronchial stenosis",
+      "snomed": "238664007",
+      "site": "Right middle lobe medial basal segment distal bronchus",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Bronchial occlusion",
+      "snomed": "238664007",
+      "site": "Right middle lobe medial basal segment distal bronchus",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Lymphadenopathy",
+      "snomed": "238664007",
+      "site": "Right hilum",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Lymphadenopathy",
+      "snomed": "238664007",
+      "site": "Mediastinum",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Pericardial effusion",
+      "snomed": "418746001",
+      "site": "Pericardium",
+      "size": "Small to moderate",
+      "characteristics": ""
+    },
+    {
+      "term": "Aortic valve calcification",
+      "snomed": "267036007",
+      "site": "Aortic valve",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Aortic wall calcification",
+      "snomed": "267036007",
+      "site": "Aorta",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Pleural effusion",
+      "snomed": "418746001",
+      "site": "Left pleural space",
+      "size": "Small",
+      "characteristics": ""
+    },
+    {
+      "term": "Pathologic fracture",
+      "snomed": "267036007",
+      "site": "Right 5th anterior rib",
+      "size": "",
+      "characteristics": ""
+    },
+    {
+      "term": "Soft tissue mass",
+      "snomed": "267036007",
+      "site": "Right 5th anterior rib",
+      "size": "",
+      "characteristics": "Local"
+    },
+    {
+      "term": "Soft tissue nodule",
+      "snomed": "267036007",
+      "site": "Right 2nd/3rd intercostal space",
+      "size": "",
+      "characteristics": ""
+    }
+  ],
+  "structures": [
+    {
+      "name": "Right chest wall",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Right pleura",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Right lung",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Right middle lobe",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Right lower lobe",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Left lung",
+      "snomed": "123040007",
+      "laterality": "Left"
+    },
+    {
+      "name": "Left upper lobe",
+      "snomed": "123040007",
+      "laterality": "Left"
+    },
+    {
+      "name": "Left lower lobe",
+      "snomed": "123040007",
+      "laterality": "Left"
+    },
+    {
+      "name": "Right hilum",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Mediastinum",
+      "snomed": "123040007",
+      "laterality": "Unilateral"
+    },
+    {
+      "name": "Pericardium",
+      "snomed": "123040007",
+      "laterality": "Unilateral"
+    },
+    {
+      "name": "Aortic valve",
+      "snomed": "123040007",
+      "laterality": "Unilateral"
+    },
+    {
+      "name": "Aorta",
+      "snomed": "123040007",
+      "laterality": "Unilateral"
+    },
+    {
+      "name": "Left pleura",
+      "snomed": "123040007",
+      "laterality": "Left"
+    },
+    {
+      "name": "Right 5th anterior rib",
+      "snomed": "123040007",
+      "laterality": "Right"
+    },
+    {
+      "name": "Right 2nd

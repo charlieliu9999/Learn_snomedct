@@ -21,11 +21,14 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 try:
-    # Corrected import path to reflect the new, valid package name
-    from KnowledgeForge_Project.knowledgeforge import process as knowledgeforge_process
+    # 导入新的SNOMED CT分析器和可视化功能
+    from KnowledgeForge_Project.knowledgeforge import (
+        process as knowledgeforge_process,
+        analyze_medical_report_with_snomed,
+        display_snomed_visualization
+    )
     KNOWLEDGEFORGE_AVAILABLE = True
 except ImportError as e:
-    # This will now hopefully not be triggered
     print(f"DEBUG: Failed to import KnowledgeForge: {e}")
     KNOWLEDGEFORGE_AVAILABLE = False
 # ================= KnowledgeForge Integration: End ===================
@@ -549,56 +552,77 @@ with analysis_col2:
 # ================= KnowledgeForge Integration: Start =================
 with analysis_col3:
     if KNOWLEDGEFORGE_AVAILABLE:
-        if st.button("使用 KnowledgeForge 深度分析", type="primary", key=f"kf_analyze_{current_idx}", use_container_width=True):
-            st.session_state.kf_result = None # Clear previous results
-            with st.spinner("第一步：执行初步提取..."):
-                extractor = st.session_state.structure_extractor
+        if st.button("🧠 SNOMED CT 智能分析", type="primary", key=f"snomed_analyze_{current_idx}", use_container_width=True):
+            st.session_state.snomed_result = None  # Clear previous results
+            
+            with st.spinner("🔍 正在使用专业SNOMED CT分析器处理医学报告..."):
+                # 获取报告文本
                 image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
                 diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
                 
-                # 1. Get the raw JSON from the original extractor
-                raw_result = extractor.analyze_single_report(image_text, diagnosis_text)
-                st.info("初步提取完成。")
-
-                # --- DEBUG: Display the raw result ---
-                with st.expander("🔍 查看初步提取的原始JSON", expanded=True):
-                    st.json(raw_result)
-                # --- END DEBUG ---
-
-            with st.spinner("第二步：启动 KnowledgeForge 引擎进行验证、丰富和关联..."):
-                # --- ADAPTER: Convert raw_result to KnowledgeForge's expected format ---
-                kf_input = {}
-                structured_data = raw_result.get("结构化数据", {})
-                
-                # We will treat '病变特征' as 'ClinicalFindings' for now.
-                # A more robust solution might involve mapping fields.
-                kf_input["ClinicalFindings"] = structured_data.get("病变特征", [])
-                
-                # Rename '诊断信息' to 'Diagnoses'
-                kf_input["Diagnoses"] = structured_data.get("诊断信息", [])
-
-                # Add other top-level info if needed by KF in the future
-                kf_input["PatientInfo"] = raw_result.get("PatientInfo", {})
-
-                with st.expander("🔧 查看适配后的输入JSON (送入KF)", expanded=False):
-                    st.json(kf_input)
-                # --- END ADAPTER ---
-
-                # 2. Define DB path and process with KnowledgeForge
+                # 使用新的SNOMED CT分析器
                 db_path = os.path.join(project_root, "KnowledgeForge_Project", "data", "knowledge.db")
+                
                 if not os.path.exists(db_path):
-                    st.error(f"KnowledgeForge数据库未找到，请先运行 KnowledgeForge_Project/knowledgeforge/db_manager.py 来初始化数据库。路径：{db_path}")
+                    st.error(f"KnowledgeForge数据库未找到，路径：{db_path}")
                 else:
-                    # Pass the adapted input to the engine
-                    final_result = knowledgeforge_process(kf_input, db_path)
-                    st.session_state.kf_result = final_result
-                    st.success("KnowledgeForge 深度分析完成！")
+                    try:
+                        # 直接分析医学报告
+                        snomed_result = analyze_medical_report_with_snomed(
+                            findings_text=image_text,
+                            diagnosis_text=diagnosis_text,
+                            db_path=db_path,
+                            patient_info={"report_id": current_idx}
+                        )
+                        
+                        st.session_state.snomed_result = snomed_result
+                        
+                        # 显示处理结果摘要
+                        if "error" not in snomed_result:
+                            quality = snomed_result.get("quality_assessment", {})
+                            col1, col2, col3, col4 = st.columns(4)
+                            
+                            with col1:
+                                st.metric("实体数量", quality.get("entity_count", 0))
+                            with col2:
+                                st.metric("关系数量", quality.get("relationship_count", 0))
+                            with col3:
+                                st.metric("质量分数", f"{quality.get('overall_score', 0):.2f}")
+                            with col4:
+                                st.metric("处理时间", f"{snomed_result.get('processing_time', 0):.1f}秒")
+                            
+                            st.success("✅ SNOMED CT智能分析完成！")
+                        else:
+                            st.error(f"❌ 分析失败：{snomed_result.get('error', '未知错误')}")
+                            
+                    except Exception as e:
+                        st.error(f"❌ SNOMED CT分析出错：{str(e)}")
     else:
-        st.warning("KnowledgeForge 模块未找到，深度分析功能不可用。")
+        st.warning("KnowledgeForge 模块未找到，SNOMED CT智能分析功能不可用。")
 
-# Display KF results if they exist in session state
-if "kf_result" in st.session_state and st.session_state.kf_result:
-    display_knowledgeforge_results(st.session_state.kf_result)
+# Display SNOMED CT results if they exist in session state
+if "snomed_result" in st.session_state and st.session_state.snomed_result:
+    snomed_result = st.session_state.snomed_result
+    
+    if "error" not in snomed_result:
+        st.markdown("---")
+        st.markdown("### 🧠 SNOMED CT 智能分析结果")
+        
+        # 显示可视化结果
+        entities = snomed_result.get("extracted_entities", [])
+        relationships = snomed_result.get("relationships", [])
+        hierarchy_data = snomed_result.get("hierarchy_data", [])
+        
+        if entities or relationships or hierarchy_data:
+            # 使用新的可视化功能
+            display_snomed_visualization(entities, relationships, hierarchy_data)
+        
+        # 显示详细分析数据
+        with st.expander("📊 查看详细分析数据", expanded=False):
+            st.json(snomed_result)
+    else:
+        st.error(f"SNOMED CT分析失败：{snomed_result.get('error', '未知错误')}")
+
 # ================= KnowledgeForge Integration: End ===================
 
 # 原有的分析结果展示逻辑

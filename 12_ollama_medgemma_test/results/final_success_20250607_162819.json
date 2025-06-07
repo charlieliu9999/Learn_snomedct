@@ -1,0 +1,170 @@
+{
+  "summary": {
+    "status": "SUCCESS",
+    "message": "成功完成最终优化版测试，JSON解析无误，并启用keep_alive。",
+    "model": "medgemma:latest",
+    "timestamp": "20250607_162819"
+  },
+  "performance": {
+    "processing_time_seconds": 3.67,
+    "comment": "首次加载可能较慢，后续调用会因keep_alive而加速。"
+  },
+  "input": {
+    "report_text": "影像所见：双侧大脑半球、脑干及小脑形态正常，脑实质内未见明显异常密度影，脑室系统未及异常，脑沟﹑裂无增宽，中线结构居中。骨窗示颅骨未见明显骨质异常。\n影像诊断：颅脑CT平扫未见明显异常。"
+  },
+  "output": {
+    "raw_response_length": 3747,
+    "parsed_result": {
+      "clinical_findings": [
+        {
+          "concept_en": "Normal brain morphology",
+          "concept_zh": "脑形态正常",
+          "relationships": {
+            "finding_site": "Brain",
+            "associated_morphology": "Normal",
+            "laterality": "Bilateral",
+            "severity": "Normal",
+            "has_measurement": ""
+          },
+          "source_sentence": "双侧大脑半球、脑干及小脑形态正常"
+        },
+        {
+          "concept_en": "Absence of abnormal density",
+          "concept_zh": "无明显异常密度影",
+          "relationships": {
+            "finding_site": "Brain parenchyma",
+            "associated_morphology": "Absence of finding",
+            "laterality": "Bilateral",
+            "severity": "Normal",
+            "has_measurement": ""
+          },
+          "source_sentence": "脑实质内未见明显异常密度影"
+        },
+        {
+          "concept_en": "Normal ventricular system",
+          "concept_zh": "脑室系统未及异常",
+          "relationships": {
+            "finding_site": "Ventricular system",
+            "associated_morphology": "Normal",
+            "laterality": "Bilateral",
+            "severity": "Normal",
+            "has_measurement": ""
+          },
+          "source_sentence": "脑室系统未及异常"
+        },
+        {
+          "concept_en": "Normal cerebral sulci and fissures",
+          "concept_zh": "脑沟﹑裂无增宽",
+          "relationships": {
+            "finding_site": "Cerebral sulci and fissures",
+            "associated_morphology": "Normal",
+            "laterality": "Bilateral",
+            "severity": "Normal",
+            "has_measurement": ""
+          },
+          "source_sentence": "脑沟﹑裂无增宽"
+        },
+        {
+          "concept_en": "Midline structures in normal position",
+          "concept_zh": "中线结构居中",
+          "relationships": {
+            "finding_site": "Midline structures",
+            "associated_morphology": "Normal",
+            "laterality": "Midline",
+            "severity": "Normal",
+            "has_measurement": ""
+          },
+          "source_sentence": "中线结构居中"
+        },
+        {
+          "concept_en": "Normal bone structure",
+          "concept_zh": "颅骨未见明显骨质异常",
+          "relationships": {
+            "finding_site": "Skull bone",
+            "associated_morphology": "Normal",
+            "laterality": "Bilateral",
+            "severity": "Normal",
+            "has_measurement": ""
+          },
+          "source_sentence": "骨窗示颅骨未见明显骨质异常"
+        }
+      ],
+      "body_structures": [
+        {
+          "concept_en": "Cerebral hemisphere",
+          "concept_zh": "大脑半球",
+          "laterality": "Bilateral",
+          "description": "Normal morphology",
+          "source_sentence": "双侧大脑半球、脑干及小脑形态正常"
+        },
+        {
+          "concept_en": "Brainstem",
+          "concept_zh": "脑干",
+          "laterality": "Midline",
+          "description": "Normal morphology",
+          "source_sentence": "双侧大脑半球、脑干及小脑形态正常"
+        },
+        {
+          "concept_en": "Cerebellum",
+          "concept_zh": "小脑",
+          "laterality": "Midline",
+          "description": "Normal morphology",
+          "source_sentence": "双侧大脑半球、脑干及小脑形态正常"
+        },
+        {
+          "concept_en": "Brain parenchyma",
+          "concept_zh": "脑实质",
+          "laterality": "Bilateral",
+          "description": "No abnormal density",
+          "source_sentence": "脑实质内未见明显异常密度影"
+        },
+        {
+          "concept_en": "Ventricular system",
+          "concept_zh": "脑室系统",
+          "laterality": "Bilateral",
+          "description": "Normal",
+          "source_sentence": "脑室系统未及异常"
+        },
+        {
+          "concept_en": "Cerebral sulci and fissures",
+          "concept_zh": "脑沟﹑裂",
+          "laterality": "Bilateral",
+          "description": "Not widened",
+          "source_sentence": "脑沟﹑裂无增宽"
+        },
+        {
+          "concept_en": "Midline structures",
+          "concept_zh": "中线结构",
+          "laterality": "Midline",
+          "description": "Centered",
+          "source_sentence": "中线结构居中"
+        },
+        {
+          "concept_en": "Skull bone",
+          "concept_zh": "颅骨",
+          "laterality": "Bilateral",
+          "description": "No abnormal bone quality",
+          "source_sentence": "骨窗示颅骨未见明显骨质异常"
+        }
+      ],
+      "diagnoses": [
+        {
+          "concept_en": "Normal finding",
+          "concept_zh": "未见明显异常",
+          "relationships": {
+            "finding_site": "Brain",
+            "associated_morphology": "Normal",
+            "laterality": "Bilateral",
+            "severity": "Normal"
+          },
+          "source_sentence": "颅脑CT平扫未见明显异常"
+        }
+      ],
+      "overall_quality": {
+        "completeness": "Complete",
+        "clarity": "Clear",
+        "comment": "The report describes a normal cranial CT scan."
+      }
+    }
+  }
+}

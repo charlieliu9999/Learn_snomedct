@@ -175,9 +175,9 @@ elif data_source == "本地数据文件":
                 try:
                     st.sidebar.info(f"正在读取上传的文件: {uploaded_file.name}")
                     # uploaded_file 是一个内存中的类文件对象，pandas可以直接读取
-                    df = pd.read_excel(uploaded_file) 
-                        st.session_state.raw_data = df
-                        st.session_state.data_loaded = True
+                    df = pd.read_excel(uploaded_file)
+                    st.session_state.raw_data = df
+                    st.session_state.data_loaded = True
                     st.session_state.processed_data = None # 清除旧的处理数据
                     st.session_state.findings_col = None # Reset for auto-detection
                     st.session_state.impression_col = None # Reset for auto-detection
@@ -338,10 +338,10 @@ else:
     if pref_f and pref_f in report_columns:
         if current_findings_val is None or current_findings_val not in report_columns:
             st.session_state.findings_col = pref_f
-            current_findings_val = pref_f # update for immediate use
+            current_findings_val = pref_f
 
     pref_i = st.session_state.get("user_preferred_impression_col")
-    if pref_i and pref_i in report_columns and pref_i != current_findings_val: # Ensure different from findings if findings is set
+    if pref_i and pref_i in report_columns and pref_i != current_findings_val: 
         if current_impression_val is None or current_impression_val not in report_columns or current_impression_val == current_findings_val:
             st.session_state.impression_col = pref_i
             current_impression_val = pref_i
@@ -351,74 +351,51 @@ else:
         st.session_state.findings_col = auto_detect_column(report_columns, ALL_FINDINGS_KEYWORDS)
 
     impression_candidates = [col for col in report_columns if col != st.session_state.get("findings_col")]
-    if not impression_candidates: impression_candidates = report_columns # Handle if only one col or findings_col is None
+    if not impression_candidates: impression_candidates = report_columns
 
     if st.session_state.get("impression_col") is None or \
        st.session_state.get("impression_col") not in report_columns or \
        st.session_state.get("impression_col") == st.session_state.get("findings_col"):
         st.session_state.impression_col = auto_detect_column(impression_candidates, ALL_IMPRESSION_KEYWORDS)
 
-
-    # Determine default index for selectboxes using the now-set session_state values
     try:
         findings_default_idx = report_columns.index(st.session_state.findings_col) if st.session_state.findings_col in report_columns else default_idx
     except ValueError:
         findings_default_idx = default_idx
 
     try:
-        # Attempt to make impression default different if findings is already set and they are the same
-        temp_impression_default_val = st.session_state.impression_col
-        if temp_impression_default_val == st.session_state.findings_col and st.session_state.findings_col is not None and len(report_columns) > 1:
-            if findings_default_idx + 1 < len(report_columns):
-                temp_impression_default_val = report_columns[(findings_default_idx + 1)]
-            elif findings_default_idx -1 >= 0 : # try previous if next is out of bounds
-                 temp_impression_default_val = report_columns[(findings_default_idx - 1)]
-            # If still same (e.g. only 1 or 2 columns and one is picked), it's okay, warning will show.
-        
-        impression_default_idx = report_columns.index(temp_impression_default_val) if temp_impression_default_val in report_columns else default_idx
-        if impression_default_idx == findings_default_idx and len(report_columns) > 1 : # Final check if they are identical
-            impression_default_idx = (default_idx + 1) % len(report_columns) if len(report_columns) > 0 else 0
-
-
+        impression_candidates_for_idx = [col for col in report_columns if col != st.session_state.findings_col]
+        if not impression_candidates_for_idx: impression_candidates_for_idx = report_columns
+        impression_default_idx = impression_candidates_for_idx.index(st.session_state.impression_col) if st.session_state.impression_col in impression_candidates_for_idx else default_idx
     except ValueError:
-        impression_default_idx = (default_idx + 1 if len(report_columns) > 1 else default_idx)
+        impression_default_idx = default_idx
+
+    # -- Manually Corrected Selectbox Widgets and Logic --
+    col1, col2 = st.columns(2)
+    with col1:
+        selected_findings_col = st.selectbox(
+            label='1. 选择“影像表现”字段:',
+            options=report_columns,
+            index=findings_default_idx,
+            key='findings_select'
+        )
+
+    with col2:
+        selected_impression_col = st.selectbox(
+            label='2. 选择“诊断结论”字段:',
+            options=report_columns,
+            index=impression_default_idx,
+            key='impression_select'
+        )
+
+    st.session_state.findings_col = selected_findings_col
+    st.session_state.impression_col = selected_impression_col
     
-    if not report_columns: # Ensure indices are valid if no columns
-        findings_default_idx = 0
-        impression_default_idx = 0
-    
-    # Ensure indices are within bounds if list is very small
-    if findings_default_idx >= len(options_for_selectbox): findings_default_idx = 0
-    if impression_default_idx >= len(options_for_selectbox): impression_default_idx = 0
-
-
-    selected_findings_col = st.selectbox(
-        label="1. 选择“影像表现”字段:",
-        options=options_for_selectbox,
-        index=findings_default_idx,
-        help="选择包含患者详细影像学检查描述文本的列。",
-        key="sb_findings_col"
-    )
-    if report_columns:
-      st.session_state.findings_col = selected_findings_col
-
-    selected_impression_col = st.selectbox(
-        label="2. 选择“诊断结论”字段:",
-        options=options_for_selectbox,
-        index=impression_default_idx,
-        help="选择包含医生基于影像表现给出的诊断意见或结论文本的列。",
-        key="sb_impression_col"
-    )
-    if report_columns:
-      st.session_state.impression_col = selected_impression_col
-
     if st.session_state.get("findings_col") and st.session_state.get("impression_col"):
-        if st.session_state.findings_col == st.session_state.impression_col and report_columns and len(report_columns) > 1 :
-            warning_text = f"“影像表现”和“诊断结论”不应选择同一列 ('{st.session_state.findings_col}'). 请分别指定."
-            st.warning(warning_text)
+        if st.session_state.findings_col == st.session_state.impression_col and len(report_columns) > 1:
+            st.warning(f"“影像表现”和“诊断结论”不应选择同一列 ('{st.session_state.findings_col}'). 请分别指定.")
         else:
-            success_text = f"已指定关键字段：影像表现列 = **'{st.session_state.findings_col}'**，诊断结论列 = **'{st.session_state.impression_col}'**"
-            st.success(success_text)
+            st.success(f"已指定关键字段：影像表现列 = **'{st.session_state.findings_col}'**，诊断结论列 = **'{st.session_state.impression_col}'**")
     elif report_columns:
         st.info("请在上方选择或确认“影像表现”和“诊断结论”对应的列.")
     

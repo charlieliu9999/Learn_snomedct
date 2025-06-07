@@ -1,0 +1,205 @@
+--- 调试信息 ---
+时间: 20250607_145921
+处理耗时: 135.91秒
+原始响应长度: 3995
+
+--- 原始报告 ---
+右侧胸廓塌陷,右侧胸膜呈结节状明显增厚,增强扫描呈不均匀明显强化,右侧液气胸,部分呈包裹性.双肺散在大小不等结节影,较大者位于右肺中叶,直径约1.8cm,右肺中叶及下叶见实变、条索影,右肺中叶见钙化灶;左肺上叶尖后段及下叶后基底段见少许纤维条影.右肺中叶内侧段远端支气管狭窄、闭塞.右肺门及纵隔淋巴结增大,纵隔未见移位.心脏未见增大,心包少-中量积液.主动脉瓣及主动脉壁钙化.左侧胸腔少量积液.右侧第5前肋病理性骨折并局部软组织肿块影.右侧第2/3肋间见软组织结节影.
+
+--- 模型原始响应 ---
+```json
+{
+  "clinical_findings": [
+    {
+      "term": "胸廓塌陷",
+      "snomed_ct_id": "23478006",
+      "details": "右侧胸廓塌陷"
+    },
+    {
+      "term": "胸膜增厚",
+      "snomed_ct_id": "23478006",
+      "details": "右侧胸膜呈结节状明显增厚"
+    },
+    {
+      "term": "胸膜强化",
+      "snomed_ct_id": "26756000",
+      "details": "增强扫描呈不均匀明显强化"
+    },
+    {
+      "term": "液气胸",
+      "snomed_ct_id": "23478006",
+      "details": "右侧液气胸,部分呈包裹性"
+    },
+    {
+      "term": "肺结节",
+      "snomed_ct_id": "26756000",
+      "details": "双肺散在大小不等结节影,较大者位于右肺中叶,直径约1.8cm"
+    },
+    {
+      "term": "肺实变",
+      "snomed_ct_id": "23478006",
+      "details": "右肺中叶及下叶见实变"
+    },
+    {
+      "term": "条索影",
+      "snomed_ct_id": "23478006",
+      "details": "右肺中叶及下叶见条索影"
+    },
+    {
+      "term": "钙化灶",
+      "snomed_ct_id": "23478006",
+      "details": "右肺中叶见钙化灶"
+    },
+    {
+      "term": "纤维条影",
+      "snomed_ct_id": "23478006",
+      "details": "左肺上叶尖后段及下叶后基底段见少许纤维条影"
+    },
+    {
+      "term": "支气管狭窄",
+      "snomed_ct_id": "23478006",
+      "details": "右肺中叶内侧段远端支气管狭窄"
+    },
+    {
+      "term": "支气管闭塞",
+      "snomed_ct_id": "23478006",
+      "details": "右肺中叶内侧段远端支气管闭塞"
+    },
+    {
+      "term": "淋巴结增大",
+      "snomed_ct_id": "23478006",
+      "details": "右肺门及纵隔淋巴结增大"
+    },
+    {
+      "term": "心包积液",
+      "snomed_ct_id": "23478006",
+      "details": "心包少-中量积液"
+    },
+    {
+      "term": "主动脉瓣钙化",
+      "snomed_ct_id": "23478006",
+      "details": "主动脉瓣及主动脉壁钙化"
+    },
+    {
+      "term": "胸腔积液",
+      "snomed_ct_id": "23478006",
+      "details": "左侧胸腔少量积液"
+    },
+    {
+      "term": "肋骨骨折",
+      "snomed_ct_id": "23478006",
+      "details": "右侧第5前肋病理性骨折"
+    },
+    {
+      "term": "软组织肿块",
+      "snomed_ct_id": "23478006",
+      "details": "右侧第5前肋病理性骨折并局部软组织肿块影"
+    },
+    {
+      "term": "软组织结节",
+      "snomed_ct_id": "23478006",
+      "details": "右侧第2/3肋间见软组织结节影"
+    }
+  ],
+  "body_structures": [
+    {
+      "name": "胸廓",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "塌陷"
+    },
+    {
+      "name": "胸膜",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "结节状明显增厚"
+    },
+    {
+      "name": "肺",
+      "snomed_ct_id": "12304003",
+      "laterality": "双侧",
+      "description": "散在大小不等结节影"
+    },
+    {
+      "name": "肺",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "中叶及下叶见实变、条索影、钙化灶"
+    },
+    {
+      "name": "肺",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "中叶较大结节影,直径约1.8cm"
+    },
+    {
+      "name": "肺",
+      "snomed_ct_id": "12304003",
+      "laterality": "左侧",
+      "description": "上叶尖后段及下叶后基底段见少许纤维条影"
+    },
+    {
+      "name": "支气管",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "中叶内侧段远端狭窄、闭塞"
+    },
+    {
+      "name": "淋巴结",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "肺门及纵隔增大"
+    },
+    {
+      "name": "心包",
+      "snomed_ct_id": "12304003",
+      "laterality": "无",
+      "description": "少-中量积液"
+    },
+    {
+      "name": "主动脉瓣",
+      "snomed_ct_id": "12304003",
+      "laterality": "无",
+      "description": "钙化"
+    },
+    {
+      "name": "主动脉壁",
+      "snomed_ct_id": "12304003",
+      "laterality": "无",
+      "description": "钙化"
+    },
+    {
+      "name": "胸腔",
+      "snomed_ct_id": "12304003",
+      "laterality": "左侧",
+      "description": "少量积液"
+    },
+    {
+      "name": "肋骨",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "第5前肋病理性骨折"
+    },
+    {
+      "name": "软组织",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "第5前肋局部肿块影"
+    },
+    {
+      "name": "软组织",
+      "snomed_ct_id": "12304003",
+      "laterality": "右侧",
+      "description": "第2/3肋间结节影"
+    }
+  ],
+  "lesion_characteristics": [
+    {
+      "feature": "大小",
+      "value": "不等",
+      "snomed_ct_id": "25538008"
+    },
+    {
+      "feature": "大小",
+      "value": "约1.8cm",
+      "snomed_ct_id": "25538008"

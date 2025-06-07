@@ -1,0 +1,320 @@
+{
+  "summary": {
+    "status": "SUCCESS",
+    "message": "成功完成最终优化版测试，JSON解析无误，并启用keep_alive。",
+    "model": "medgemma:latest",
+    "timestamp": "20250607_150747"
+  },
+  "performance": {
+    "processing_time_seconds": 218.19,
+    "comment": "首次加载可能较慢，后续调用会因keep_alive而加速。"
+  },
+  "input": {
+    "report_text": "右侧胸廓塌陷,右侧胸膜呈结节状明显增厚,增强扫描呈不均匀明显强化,右侧液气胸,部分呈包裹性.双肺散在大小不等结节影,较大者位于右肺中叶,直径约1.8cm,右肺中叶及下叶见实变、条索影,右肺中叶见钙化灶;左肺上叶尖后段及下叶后基底段见少许纤维条影.右肺中叶内侧段远端支气管狭窄、闭塞.右肺门及纵隔淋巴结增大,纵隔未见移位.心脏未见增大,心包少-中量积液.主动脉瓣及主动脉壁钙化.左侧胸腔少量积液.右侧第5前肋病理性骨折并局部软组织肿块影.右侧第2/3肋间见软组织结节影."
+  },
+  "output": {
+    "raw_response_length": 6230,
+    "parsed_result": {
+      "clinical_findings": [
+        {
+          "term": "胸廓塌陷",
+          "snomed_ct_id": "233604007",
+          "details": "右侧胸廓塌陷"
+        },
+        {
+          "term": "胸膜增厚",
+          "snomed_ct_id": "233605005",
+          "details": "右侧胸膜呈结节状明显增厚"
+        },
+        {
+          "term": "胸膜强化",
+          "snomed_ct_id": "233606009",
+          "details": "增强扫描呈不均匀明显强化"
+        },
+        {
+          "term": "液气胸",
+          "snomed_ct_id": "233607005",
+          "details": "右侧液气胸,部分呈包裹性"
+        },
+        {
+          "term": "肺结节",
+          "snomed_ct_id": "233608004",
+          "details": "双肺散在大小不等结节影,较大者位于右肺中叶,直径约1.8cm"
+        },
+        {
+          "term": "肺实变",
+          "snomed_ct_id": "233609008",
+          "details": "右肺中叶及下叶见实变"
+        },
+        {
+          "term": "条索影",
+          "snomed_ct_id": "233610002",
+          "details": "右肺中叶及下叶见条索影"
+        },
+        {
+          "term": "钙化灶",
+          "snomed_ct_id": "233611009",
+          "details": "右肺中叶见钙化灶"
+        },
+        {
+          "term": "纤维条影",
+          "snomed_ct_id": "233612005",
+          "details": "左肺上叶尖后段及下叶后基底段见少许纤维条影"
+        },
+        {
+          "term": "支气管狭窄",
+          "snomed_ct_id": "233613004",
+          "details": "右肺中叶内侧段远端支气管狭窄"
+        },
+        {
+          "term": "支气管闭塞",
+          "snomed_ct_id": "233614008",
+          "details": "右肺中叶内侧段远端支气管闭塞"
+        },
+        {
+          "term": "淋巴结肿大",
+          "snomed_ct_id": "233615007",
+          "details": "右肺门及纵隔淋巴结增大"
+        },
+        {
+          "term": "纵隔移位",
+          "snomed_ct_id": "233616006",
+          "details": "纵隔未见移位"
+        },
+        {
+          "term": "心脏增大",
+          "snomed_ct_id": "233617005",
+          "details": "心脏未见增大"
+        },
+        {
+          "term": "心包积液",
+          "snomed_ct_id": "233618004",
+          "details": "心包少-中量积液"
+        },
+        {
+          "term": "主动脉瓣钙化",
+          "snomed_ct_id": "233619008",
+          "details": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "term": "胸腔积液",
+          "snomed_ct_id": "233620005",
+          "details": "左侧胸腔少量积液"
+        },
+        {
+          "term": "病理性骨折",
+          "snomed_ct_id": "233621009",
+          "details": "右侧第5前肋病理性骨折"
+        },
+        {
+          "term": "软组织肿块影",
+          "snomed_ct_id": "233622006",
+          "details": "右侧第5前肋病理性骨折并局部软组织肿块影"
+        },
+        {
+          "term": "软组织结节影",
+          "snomed_ct_id": "233623004",
+          "details": "右侧第2/3肋间见软组织结节影"
+        }
+      ],
+      "body_structures": [
+        {
+          "name": "胸廓",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "塌陷"
+        },
+        {
+          "name": "胸膜",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "结节状明显增厚"
+        },
+        {
+          "name": "肺",
+          "snomed_ct_id": "123040007",
+          "laterality": "双侧",
+          "description": "散在大小不等结节影"
+        },
+        {
+          "name": "肺",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "中叶及下叶见实变、条索影、钙化灶"
+        },
+        {
+          "name": "肺",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "中叶较大结节影,直径约1.8cm"
+        },
+        {
+          "name": "肺",
+          "snomed_ct_id": "123040007",
+          "laterality": "左侧",
+          "description": "上叶尖后段及下叶后基底段见少许纤维条影"
+        },
+        {
+          "name": "支气管",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "中叶内侧段远端狭窄、闭塞"
+        },
+        {
+          "name": "淋巴结",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "肺门及纵隔增大"
+        },
+        {
+          "name": "纵隔",
+          "snomed_ct_id": "123040007",
+          "laterality": "未指定",
+          "description": "未见移位"
+        },
+        {
+          "name": "心脏",
+          "snomed_ct_id": "123040007",
+          "laterality": "未指定",
+          "description": "未见增大"
+        },
+        {
+          "name": "心包",
+          "snomed_ct_id": "123040007",
+          "laterality": "未指定",
+          "description": "少-中量积液"
+        },
+        {
+          "name": "主动脉瓣",
+          "snomed_ct_id": "123040007",
+          "laterality": "未指定",
+          "description": "钙化"
+        },
+        {
+          "name": "主动脉壁",
+          "snomed_ct_id": "123040007",
+          "laterality": "未指定",
+          "description": "钙化"
+        },
+        {
+          "name": "胸腔",
+          "snomed_ct_id": "123040007",
+          "laterality": "左侧",
+          "description": "少量积液"
+        },
+        {
+          "name": "肋骨",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "第5前肋病理性骨折"
+        },
+        {
+          "name": "软组织",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "第5前肋局部肿块影"
+        },
+        {
+          "name": "软组织",
+          "snomed_ct_id": "123040007",
+          "laterality": "右侧",
+          "description": "第2/3肋间结节影"
+        }
+      ],
+      "lesion_characteristics": [
+        {
+          "feature": "大小",
+          "value": "不等",
+          "snomed_ct_id": "255384009"
+        },
+        {
+          "feature": "大小",
+          "value": "约1.8cm",
+          "snomed_ct_id": "255384009"
+        },
+        {
+          "feature": "形态",
+          "value": "结节状",
+          "snomed_ct_id": "255385008"
+        },
+        {
+          "feature": "形态",
+          "value": "条索状",
+          "snomed_ct_id": "255385008"
+        },
+        {
+          "feature": "形态",
+          "value": "肿块状",
+          "snomed_ct_id": "255385008"
+        },
+        {
+          "feature": "形态",
+          "value": "结节状",
+          "snomed_ct_id": "255385008"
+        },
+        {
+          "feature": "密度/强度",
+          "value": "不均匀强化",
+          "snomed_ct_id": "255386007"
+        },
+        {
+          "feature": "形态",
+          "value": "钙化",
+          "snomed_ct_id": "255385008"
+        },
+        {
+          "feature": "形态",
+          "value": "纤维状",
+          "snomed_ct_id": "255385008"
+        }
+      ],
+      "diagnostic_categories": [
+        {
+          "category": "胸膜疾病",
+          "description": "右侧胸膜结节状增厚,不均匀强化,部分包裹性液气胸",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "肺部疾病",
+          "description": "双肺散在结节影,右肺中叶及下叶实变、条索影、钙化灶,右肺中叶较大结节影,左肺上叶尖后段及下叶后基底段纤维条影",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "气道疾病",
+          "description": "右肺中叶内侧段远端支气管狭窄、闭塞",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "淋巴系统疾病",
+          "description": "右肺门及纵隔淋巴结增大",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "心血管疾病",
+          "description": "心包少-中量积液,主动脉瓣及主动脉壁钙化",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "胸腔疾病",
+          "description": "左侧胸腔少量积液",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "骨骼疾病",
+          "description": "右侧第5前肋病理性骨折",
+          "snomed_ct_id": "36388003"
+        },
+        {
+          "category": "软组织疾病",
+          "description": "右侧第5前肋局部软组织肿块影,右侧第2/3肋间软组织结节影",
+          "snomed_ct_id": "36388003"
+        }
+      ],
+      "quality_assessment": {
+        "completeness": "5",
+        "clarity": "5",
+        "overall_score": "10"
+      }
+    }
+  }
+}

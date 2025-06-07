@@ -1,0 +1,34 @@
+你是医学信息专家，请对医学影像报告进行SNOMED CT结构化分析。
+
+报告内容: "{{REPORT}}"
+
+分析要求：
+1. 识别临床发现(Clinical Finding)和身体结构(Body Structure)
+2. 为每个概念提供SNOMED CT编码
+3. 输出标准JSON格式
+
+输出格式：
+{
+  "clinical_findings": [
+    {
+      "term": "发现术语",
+      "concept_id": "SNOMED编码",
+      "site": "部位",
+      "morphology": "形态",
+      "laterality": "侧别"
+    }
+  ],
+  "body_structures": [
+    {
+      "term": "结构术语", 
+      "concept_id": "SNOMED编码",
+      "laterality": "左侧/右侧/双侧/中线"
+    }
+  ],
+  "quality_indicators": {
+    "confidence": "高/中/低",
+    "completeness": "完整/部分/不完整"
+  }
+}
+
+请严格按JSON格式输出，不要包含其他文字。 

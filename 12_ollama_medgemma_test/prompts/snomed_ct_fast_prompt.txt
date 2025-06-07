@@ -1,0 +1,12 @@
+Analyze this medical report and extract structured data in SNOMED CT format:
+
+REPORT: {report_text}
+
+Return JSON with these sections:
+
+1. findings: [{"term":"", "snomed":"", "site":"", "size":"", "characteristics":""}]
+2. structures: [{"name":"", "snomed":"", "laterality":""}] 
+3. diagnosis: [{"category":"", "description":"", "confidence":""}]
+4. quality_score: 1-10
+
+Use accurate SNOMED CT codes. Keep descriptions concise. Ensure complete valid JSON output. 

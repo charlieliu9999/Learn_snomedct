@@ -1,0 +1,446 @@
+=== 调试信息 ===
+时间戳: 20250607_112649
+处理时间: 281.4秒
+输入报告: 右侧胸廓塌陷,右侧胸膜呈结节状明显增厚,增强扫描呈不均匀明显强化,右侧液气胸,部分呈包裹性.双肺散在大小不等结节影,较大者位于右肺中叶,直径约1.8cm,右肺中叶及下叶见实变、条索影,右肺中叶见钙化灶;左肺上叶尖后段及下叶后基底段见少许纤维条影.右肺中叶内侧段远端支气管狭窄、闭塞.右肺门及纵隔淋巴结增大,纵隔未见移位.心脏未见增大,心包少-中量积液.主动脉瓣及主动脉壁钙化.左侧胸腔少量积液.右侧第5前肋病理性骨折并局部软组织肿块影.右侧第2/3肋间见软组织结节影.
+响应长度: 9617 字符
+
+=== 原始响应 ===
+```json
+{
+  "clinical_findings": [
+    {
+      "term": "胸廓塌陷",
+      "concept_id": "23488004",
+      "site": "胸廓",
+      "laterality": "右侧",
+      "morphology": "塌陷",
+      "severity": "未提及"
+    },
+    {
+      "term": "胸膜增厚",
+      "concept_id": "26774008",
+      "site": "胸膜",
+      "laterality": "右侧",
+      "morphology": "结节状",
+      "boundary": "明显",
+      "enhancement": "不均匀明显强化",
+      "severity": "明显"
+    },
+    {
+      "term": "液气胸",
+      "concept_id": "23488004",
+      "site": "胸腔",
+      "laterality": "右侧",
+      "morphology": "液气混合",
+      "distribution": "部分呈包裹性"
+    },
+    {
+      "term": "肺结节影",
+      "concept_id": "26774008",
+      "site": "肺",
+      "laterality": "双肺",
+      "morphology": "结节状",
+      "distribution": "散在",
+      "size": "不等大小",
+      "boundary": "未提及"
+    },
+    {
+      "term": "肺结节影",
+      "concept_id": "26774008",
+      "site": "肺",
+      "laterality": "右侧",
+      "morphology": "结节状",
+      "size": "约1.8cm",
+      "location": "右肺中叶"
+    },
+    {
+      "term": "肺实变",
+      "concept_id": "26774008",
+      "site": "肺",
+      "laterality": "右侧",
+      "morphology": "实变",
+      "location": "右肺中叶及下叶"
+    },
+    {
+      "term": "条索影",
+      "concept_id": "26774008",
+      "site": "肺",
+      "laterality": "右侧",
+      "morphology": "条索状",
+      "location": "右肺中叶及下叶"
+    },
+    {
+      "term": "钙化灶",
+      "concept_id": "26774008",
+      "site": "肺",
+      "laterality": "右侧",
+      "morphology": "钙化灶",
+      "location": "右肺中叶"
+    },
+    {
+      "term": "纤维条影",
+      "concept_id": "26774008",
+      "site": "肺",
+      "laterality": "左侧",
+      "morphology": "纤维条状",
+      "location": "左肺上叶尖后段及下叶后基底段"
+    },
+    {
+      "term": "支气管狭窄",
+      "concept_id": "26774008",
+      "site": "支气管",
+      "laterality": "右侧",
+      "morphology": "狭窄",
+      "location": "右肺中叶内侧段远端"
+    },
+    {
+      "term": "支气管闭塞",
+      "concept_id": "26774008",
+      "site": "支气管",
+      "laterality": "右侧",
+      "morphology": "闭塞",
+      "location": "右肺中叶内侧段远端"
+    },
+    {
+      "term": "淋巴结增大",
+      "concept_id": "26774008",
+      "site": "淋巴结",
+      "laterality": "右侧",
+      "location": "右肺门及纵隔"
+    },
+    {
+      "term": "纵隔移位",
+      "concept_id": "26774008",
+      "site": "纵隔",
+      "laterality": "未提及",
+      "morphology": "未移位"
+    },
+    {
+      "term": "心脏增大",
+      "concept_id": "26774008",
+      "site": "心脏",
+      "laterality": "未提及",
+      "morphology": "未增大"
+    },
+    {
+      "term": "心包积液",
+      "concept_id": "26774008",
+      "site": "心包",
+      "laterality": "未提及",
+      "morphology": "积液",
+      "size": "少-中量"
+    },
+    {
+      "term": "主动脉瓣钙化",
+      "concept_id": "26774008",
+      "site": "主动脉瓣",
+      "laterality": "未提及",
+      "morphology": "钙化"
+    },
+    {
+      "term": "主动脉壁钙化",
+      "concept_id": "26774008",
+      "site": "主动脉壁",
+      "laterality": "未提及",
+      "morphology": "钙化"
+    },
+    {
+      "term": "胸腔积液",
+      "concept_id": "26774008",
+      "site": "胸腔",
+      "laterality": "左侧",
+      "morphology": "积液",
+      "size": "少量"
+    },
+    {
+      "term": "肋骨骨折",
+      "concept_id": "26774008",
+      "site": "肋骨",
+      "laterality": "右侧",
+      "morphology": "病理性骨折",
+      "location": "第5前肋"
+    },
+    {
+      "term": "软组织肿块影",
+      "concept_id": "26774008",
+      "site": "软组织",
+      "laterality": "右侧",
+      "morphology": "肿块影",
+      "location": "第5前肋局部"
+    },
+    {
+      "term": "软组织结节影",
+      "concept_id": "26774008",
+      "site": "软组织",
+      "laterality": "右侧",
+      "morphology": "结节影",
+      "location": "第2/3肋间"
+    }
+  ],
+  "body_structures": [
+    {
+      "term": "胸廓",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "躯干"
+    },
+    {
+      "term": "胸膜",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "胸腔"
+    },
+    {
+      "term": "胸腔",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "胸廓"
+    },
+    {
+      "term": "肺",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "胸腔"
+    },
+    {
+      "term": "肺",
+      "concept_id": "12304000",
+      "laterality": "左侧",
+      "parent_structure": "胸腔"
+    },
+    {
+      "term": "支气管",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "肺"
+    },
+    {
+      "term": "淋巴结",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "淋巴系统"
+    },
+    {
+      "term": "纵隔",
+      "concept_id": "12304000",
+      "laterality": "未提及",
+      "parent_structure": "胸腔"
+    },
+    {
+      "term": "心脏",
+      "concept_id": "12304000",
+      "laterality": "未提及",
+      "parent_structure": "胸腔"
+    },
+    {
+      "term": "心包",
+      "concept_id": "12304000",
+      "laterality": "未提及",
+      "parent_structure": "心脏"
+    },
+    {
+      "term": "主动脉瓣",
+      "concept_id": "12304000",
+      "laterality": "未提及",
+      "parent_structure": "心脏"
+    },
+    {
+      "term": "主动脉壁",
+      "concept_id": "12304000",
+      "laterality": "未提及",
+      "parent_structure": "主动脉"
+    },
+    {
+      "term": "肋骨",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "胸廓"
+    },
+    {
+      "term": "软组织",
+      "concept_id": "12304000",
+      "laterality": "右侧",
+      "parent_structure": "躯干"
+    }
+  ],
+  "lesion_characteristics": [
+    {
+      "location": "右侧胸膜",
+      "size": "未提及",
+      "morphology": "结节状增厚",
+      "density": "未提及",
+      "boundary": "明显",
+      "enhancement": "不均匀明显强化",
+      "associated_findings": "右侧胸廓塌陷, 右侧液气胸"
+    },
+    {
+      "location": "右肺中叶",
+      "size": "约1.8cm",
+      "morphology": "结节状",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "右肺中叶实变、条索影、钙化灶, 右肺中叶内侧段远端支气管狭窄、闭塞"
+    },
+    {
+      "location": "右肺中叶及下叶",
+      "size": "未提及",
+      "morphology": "实变",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "条索影"
+    },
+    {
+      "location": "右肺中叶及下叶",
+      "size": "未提及",
+      "morphology": "条索状",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "实变"
+    },
+    {
+      "location": "右肺中叶",
+      "size": "未提及",
+      "morphology": "钙化灶",
+      "density": "钙化",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "结节影, 实变, 条索影"
+    },
+    {
+      "location": "右肺中叶内侧段远端支气管",
+      "size": "未提及",
+      "morphology": "狭窄、闭塞",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "右肺中叶结节影、实变、条索影"
+    },
+    {
+      "location": "右肺门及纵隔",
+      "size": "未提及",
+      "morphology": "增大",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "右侧胸廓塌陷, 右侧胸膜增厚, 右侧液气胸, 右肺结节影、实变、条索影"
+    },
+    {
+      "location": "右侧第5前肋",
+      "size": "未提及",
+      "morphology": "病理性骨折",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "局部软组织肿块影"
+    },
+    {
+      "location": "右侧第5前肋局部软组织",
+      "size": "未提及",
+      "morphology": "肿块影",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "第5前肋病理性骨折"
+    },
+    {
+      "location": "右侧第2/3肋间软组织",
+      "size": "未提及",
+      "morphology": "结节影",
+      "density": "未提及",
+      "boundary": "未提及",
+      "enhancement": "未提及",
+      "associated_findings": "未提及"
+    }
+  ],
+  "diagnostic_categories": [
+    {
+      "category": "anatomical_abnormality",
+      "description": "右侧胸廓塌陷",
+      "confidence": "high",
+      "snomed_code": "23488004"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "右侧胸膜增厚",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "右侧液气胸",
+      "confidence": "high",
+      "snomed_code": "23488004"
+    },
+    {
+      "category": "tumor_related",
+      "description": "右肺结节影",
+      "confidence": "medium",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "右肺实变",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "右肺条索影",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "右肺钙化灶",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "左肺纤维条影",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "支气管狭窄",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "支气管闭塞",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "淋巴结增大",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "心包积液",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "degenerative",
+      "description": "主动脉瓣钙化",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "degenerative",
+      "description": "主动脉壁钙化",
+      "confidence": "high",
+      "snomed_code": "26774008"
+    },
+    {
+      "category": "anatomical_abnormality",
+      "description": "左侧胸腔少量积液",
+      "confidence":

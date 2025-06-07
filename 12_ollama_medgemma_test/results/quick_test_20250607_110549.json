@@ -1,0 +1,23 @@
+[
+  {
+    "test_id": 1,
+    "report": "侧大脑半球额、顶、枕、颞叶见大片状低密度区，边界模糊，侧脑室受压，中线结构偏移。脑干及小脑未见异常。",
+    "response": "```json\n{\n \"clinical_findings\": [\n  {\n   \"term\": \"大片状低密度区\",\n   \"concept_id\": \"254829006\",\n   \"site\": \"大脑半球\",\n   \"morphology\": \"低密度区\"\n  },\n  {\n   \"term\": \"边界模糊\",\n   \"concept_id\": \"246666000\",\n   \"site\": \"大脑半球\",\n   \"morphology\": \"边界模糊\"\n  },\n  {\n   \"term\": \"侧脑室受压\",\n   \"concept_id\": \"230668008\",\n   \"site\": \"侧脑室\",\n   \"morphology\": \"受压\"\n  },\n  {\n   \"term\": \"中线结构偏移\",\n   \"concept_id\": \"230669004\",\n   \"site\": \"中线结构\",\n   \"morphology\": \"偏移\"\n  }\n ],\n \"body_structures\": [\n  {\n   \"term\": \"侧大脑半球\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"侧\"\n  },\n  {\n   \"term\": \"额叶\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"侧\"\n  },\n  {\n   \"term\": \"顶叶\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"侧\"\n  },\n  {\n   \"term\": \"枕叶\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"侧\"\n  },\n  {\n   \"term\": \"颞叶\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"侧\"\n  },\n  {\n   \"term\": \"侧脑室\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"侧\"\n  },\n  {\n   \"term\": \"中线结构\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"中线\"\n  },\n  {\n   \"term\": \"脑干\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"中线\"\n  },\n  {\n   \"term\": \"小脑\",\n   \"concept_id\": \"123040007\",\n   \"laterality\": \"中线\"\n  }\n ],\n \"quality_score\": \"8\"\n}\n```",
+    "success": true,
+    "response_length": 1196
+  },
+  {
+    "test_id": 2,
+    "report": "左侧额叶见椭圆形低密度灶，直径约2.5cm，边界清楚，周围无水肿。增强扫描病灶轻度强化。",
+    "response": "```json\n{\n \"clinical_findings\": [\n  {\n   \"term\": \"低密度灶\",\n   \"concept_id\": \"254829006\",\n   \"site\": \"左侧额叶\",\n   \"morphology\": \"椭圆形\"\n  },\n  {\n   \"term\": \"轻度强化\",\n   \"concept_id\": \"260385007\",\n   \"site\": \"左侧额叶\",\n   \"morphology\": null\n  },\n  {\n   \"term\": \"无水肿\",\n   \"concept_id\": \"254829006\",\n   \"site\": \"左侧额叶\",\n   \"morphology\": null\n  }\n ],\n \"body_structures\": [\n  {\n   \"term\": \"额叶\",\n   \"concept_id\": \"127380006\",\n   \"laterality\": \"左侧\"\n  }\n ],\n \"quality_score\": 9\n}\n```",
+    "success": true,
+    "response_length": 462
+  },
+  {
+    "test_id": 3,
+    "report": "右侧颞叶内侧见结节状异常信号，T1WI呈低信号，T2WI呈高信号，DWI呈高信号。",
+    "response": "```json\n{\n \"clinical_findings\": [\n  {\n   \"term\": \"结节状异常信号\",\n   \"concept_id\": \"267036007\",\n   \"site\": \"右侧颞叶内侧\",\n   \"morphology\": \"结节状\"\n  },\n  {\n   \"term\": \"低信号\",\n   \"concept_id\": \"255579004\",\n   \"site\": \"右侧颞叶内侧\",\n   \"morphology\": null\n  },\n  {\n   \"term\": \"高信号\",\n   \"concept_id\": \"25558003\",\n   \"site\": \"右侧颞叶内侧\",\n   \"morphology\": null\n  }\n ],\n \"body_structures\": [\n  {\n   \"term\": \"颞叶\",\n   \"concept_id\": \"127410001\",\n   \"laterality\": \"右侧\"\n  },\n  {\n   \"term\": \"内侧\",\n   \"concept_id\": \"123044007\",\n   \"laterality\": \"右侧\"\n  }\n ],\n \"quality_score\": \"8\"\n}\n```",
+    "success": true,
+    "response_length": 549
+  }
+]

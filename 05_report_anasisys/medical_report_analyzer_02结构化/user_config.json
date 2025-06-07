@@ -1,0 +1,10 @@
+{
+  "llm_config": {
+    "provider": "ollama",
+    "model": "medgemma:latest",
+    "api_key": "nokey",
+    "api_base": " http://localhost:11434",
+    "temperature": 0.1,
+    "max_tokens": 4096
+  }
+}

@@ -1,0 +1,466 @@
+{
+  "summary": {
+    "status": "SUCCESS",
+    "test_type": "Complex Chest CT Report Pressure Test",
+    "message": "成功完成复杂报告的结构化分析。",
+    "model": "medgemma:latest"
+  },
+  "performance": {
+    "processing_time_seconds": 294.43,
+    "comment": "模型已预热，此为纯推理时间。"
+  },
+  "input": {
+    "report_text": "【影像所见】\n右侧胸廓塌陷, 右侧胸膜呈结节状明显增厚, 增强扫描呈不均匀明显强化, 右侧液气胸, 部分呈包裹性。双肺散在大小不等结节影, 较大者位于右肺中叶, 直径约1.8cm, 右肺中叶及下叶见实变、条索影, 右肺中叶见钙化灶。左肺上叶尖后段及下叶后基底段见少许纤维条影。右肺中叶内侧段远端支气管狭窄、闭塞。右肺门及纵隔淋巴结增大, 纵隔未见移位。心脏未见增大, 心包少-中量积液。主动脉瓣及主动脉壁钙化。左侧胸腔少量积液。右侧第5前肋病理性骨折并局部软组织肿块影。右侧第2/3肋间见软组织结节影。\n\n【影像诊断】\n1. 右肺中央型癌可能性大，伴右侧胸膜、双肺及右侧肋骨多发转移。\n2. 右侧恶性液气胸。\n3. 心包积液。\n4. 主动脉硬化。"
+  },
+  "output": {
+    "raw_response_length": 11473,
+    "parsed_result": {
+      "clinical_findings": [
+        {
+          "concept_en": "Collapse of chest wall",
+          "concept_zh": "胸廓塌陷",
+          "relationships": {
+            "finding_site": "Right chest wall",
+            "associated_morphology": "Collapse",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右侧胸廓塌陷"
+        },
+        {
+          "concept_en": "Pleural thickening",
+          "concept_zh": "胸膜增厚",
+          "relationships": {
+            "finding_site": "Right pleura",
+            "associated_morphology": "Nodular thickening",
+            "laterality": "Right",
+            "severity": "Marked",
+            "has_measurement": ""
+          },
+          "source_sentence": "右侧胸膜呈结节状明显增厚"
+        },
+        {
+          "concept_en": "Pleural enhancement",
+          "concept_zh": "胸膜强化",
+          "relationships": {
+            "finding_site": "Right pleura",
+            "associated_morphology": "Uneven enhancement",
+            "laterality": "Right",
+            "severity": "Marked",
+            "has_measurement": ""
+          },
+          "source_sentence": "增强扫描呈不均匀明显强化"
+        },
+        {
+          "concept_en": "Hydropneumothorax",
+          "concept_zh": "液气胸",
+          "relationships": {
+            "finding_site": "Right pleural space",
+            "associated_morphology": "Encapsulated",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右侧液气胸, 部分呈包裹性"
+        },
+        {
+          "concept_en": "Pulmonary nodule",
+          "concept_zh": "肺结节",
+          "relationships": {
+            "finding_site": "Lungs",
+            "associated_morphology": "Scattered nodules of varying size",
+            "laterality": "Bilateral",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "双肺散在大小不等结节影"
+        },
+        {
+          "concept_en": "Pulmonary nodule",
+          "concept_zh": "肺结节",
+          "relationships": {
+            "finding_site": "Right middle lobe of lung",
+            "associated_morphology": "Large nodule",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": "approximately 1.8 cm"
+          },
+          "source_sentence": "较大者位于右肺中叶, 直径约1.8cm"
+        },
+        {
+          "concept_en": "Consolidation of lung",
+          "concept_zh": "肺实变",
+          "relationships": {
+            "finding_site": "Right middle lobe of lung",
+            "associated_morphology": "Consolidation",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺中叶及下叶见实变"
+        },
+        {
+          "concept_en": "Linear opacity of lung",
+          "concept_zh": "条索影",
+          "relationships": {
+            "finding_site": "Right middle lobe of lung",
+            "associated_morphology": "Linear opacity",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺中叶及下叶见实变、条索影"
+        },
+        {
+          "concept_en": "Calcification of lung",
+          "concept_zh": "肺钙化灶",
+          "relationships": {
+            "finding_site": "Right middle lobe of lung",
+            "associated_morphology": "Calcification focus",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺中叶见钙化灶"
+        },
+        {
+          "concept_en": "Fibrous streak",
+          "concept_zh": "纤维条影",
+          "relationships": {
+            "finding_site": "Left upper lobe of lung",
+            "associated_morphology": "Fibrous streak",
+            "laterality": "Left",
+            "severity": "Slight",
+            "has_measurement": ""
+          },
+          "source_sentence": "左肺上叶尖后段及下叶后基底段见少许纤维条影"
+        },
+        {
+          "concept_en": "Bronchial stenosis",
+          "concept_zh": "支气管狭窄",
+          "relationships": {
+            "finding_site": "Distal segment of medial segment bronchus of right middle lobe",
+            "associated_morphology": "Stenosis",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺中叶内侧段远端支气管狭窄"
+        },
+        {
+          "concept_en": "Bronchial obstruction",
+          "concept_zh": "支气管闭塞",
+          "relationships": {
+            "finding_site": "Distal segment of medial segment bronchus of right middle lobe",
+            "associated_morphology": "Obstruction",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺中叶内侧段远端支气管狭窄、闭塞"
+        },
+        {
+          "concept_en": "Lymphadenopathy",
+          "concept_zh": "淋巴结增大",
+          "relationships": {
+            "finding_site": "Right hilum",
+            "associated_morphology": "Enlarged lymph nodes",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺门及纵隔淋巴结增大"
+        },
+        {
+          "concept_en": "Mediastinal lymphadenopathy",
+          "concept_zh": "纵隔淋巴结增大",
+          "relationships": {
+            "finding_site": "Mediastinum",
+            "associated_morphology": "Enlarged lymph nodes",
+            "laterality": "Bilateral",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右肺门及纵隔淋巴结增大"
+        },
+        {
+          "concept_en": "Mediastinal shift",
+          "concept_zh": "纵隔移位",
+          "relationships": {
+            "finding_site": "Mediastinum",
+            "associated_morphology": "No shift",
+            "laterality": "Bilateral",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "纵隔未见移位"
+        },
+        {
+          "concept_en": "Cardiomegaly",
+          "concept_zh": "心脏增大",
+          "relationships": {
+            "finding_site": "Heart",
+            "associated_morphology": "No enlargement",
+            "laterality": "Bilateral",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "心脏未见增大"
+        },
+        {
+          "concept_en": "Pericardial effusion",
+          "concept_zh": "心包积液",
+          "relationships": {
+            "finding_site": "Pericardium",
+            "associated_morphology": "Fluid collection",
+            "laterality": "Bilateral",
+            "severity": "Slight to moderate",
+            "has_measurement": ""
+          },
+          "source_sentence": "心包少-中量积液"
+        },
+        {
+          "concept_en": "Calcification of aortic valve",
+          "concept_zh": "主动脉瓣钙化",
+          "relationships": {
+            "finding_site": "Aortic valve",
+            "associated_morphology": "Calcification",
+            "laterality": "Bilateral",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "concept_en": "Calcification of aortic wall",
+          "concept_zh": "主动脉壁钙化",
+          "relationships": {
+            "finding_site": "Aortic wall",
+            "associated_morphology": "Calcification",
+            "laterality": "Bilateral",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "concept_en": "Pleural effusion",
+          "concept_zh": "胸腔积液",
+          "relationships": {
+            "finding_site": "Left pleural space",
+            "associated_morphology": "Fluid collection",
+            "laterality": "Left",
+            "severity": "Slight",
+            "has_measurement": ""
+          },
+          "source_sentence": "左侧胸腔少量积液"
+        },
+        {
+          "concept_en": "Pathologic fracture",
+          "concept_zh": "病理性骨折",
+          "relationships": {
+            "finding_site": "Right 5th anterior rib",
+            "associated_morphology": "Fracture",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右侧第5前肋病理性骨折"
+        },
+        {
+          "concept_en": "Soft tissue mass",
+          "concept_zh": "软组织肿块影",
+          "relationships": {
+            "finding_site": "Right 5th anterior rib",
+            "associated_morphology": "Mass",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右侧第5前肋病理性骨折并局部软组织肿块影"
+        },
+        {
+          "concept_en": "Soft tissue nodule",
+          "concept_zh": "软组织结节影",
+          "relationships": {
+            "finding_site": "Right 2nd/3rd intercostal space",
+            "associated_morphology": "Nodule",
+            "laterality": "Right",
+            "severity": "",
+            "has_measurement": ""
+          },
+          "source_sentence": "右侧第2/3肋间见软组织结节影"
+        }
+      ],
+      "body_structures": [
+        {
+          "concept_en": "Right chest wall",
+          "concept_zh": "右侧胸廓",
+          "laterality": "Right",
+          "description": "Collapsed",
+          "source_sentence": "右侧胸廓塌陷"
+        },
+        {
+          "concept_en": "Right pleura",
+          "concept_zh": "右侧胸膜",
+          "laterality": "Right",
+          "description": "Thickened, nodular, enhanced",
+          "source_sentence": "右侧胸膜呈结节状明显增厚, 增强扫描呈不均匀明显强化"
+        },
+        {
+          "concept_en": "Right pleural space",
+          "concept_zh": "右侧胸腔",
+          "laterality": "Right",
+          "description": "Contains hydropneumothorax",
+          "source_sentence": "右侧液气胸"
+        },
+        {
+          "concept_en": "Lungs",
+          "concept_zh": "肺",
+          "laterality": "Bilateral",
+          "description": "Contains scattered nodules",
+          "source_sentence": "双肺散在大小不等结节影"
+        },
+        {
+          "concept_en": "Right middle lobe of lung",
+          "concept_zh": "右肺中叶",
+          "laterality": "Right",
+          "description": "Contains large nodule, consolidation, linear opacity, calcification focus, bronchus stenosis/obstruction",
+          "source_sentence": "较大者位于右肺中叶, 直径约1.8cm, 右肺中叶及下叶见实变、条索影, 右肺中叶见钙化灶, 右肺中叶内侧段远端支气管狭窄、闭塞"
+        },
+        {
+          "concept_en": "Right lower lobe of lung",
+          "concept_zh": "右肺下叶",
+          "laterality": "Right",
+          "description": "Contains consolidation, linear opacity",
+          "source_sentence": "右肺中叶及下叶见实变、条索影"
+        },
+        {
+          "concept_en": "Left upper lobe of lung",
+          "concept_zh": "左肺上叶",
+          "laterality": "Left",
+          "description": "Contains fibrous streaks",
+          "source_sentence": "左肺上叶尖后段及下叶后基底段见少许纤维条影"
+        },
+        {
+          "concept_en": "Right hilum",
+          "concept_zh": "右肺门",
+          "laterality": "Right",
+          "description": "Contains enlarged lymph nodes",
+          "source_sentence": "右肺门及纵隔淋巴结增大"
+        },
+        {
+          "concept_en": "Mediastinum",
+          "concept_zh": "纵隔",
+          "laterality": "Bilateral",
+          "description": "Contains enlarged lymph nodes, not shifted",
+          "source_sentence": "右肺门及纵隔淋巴结增大, 纵隔未见移位"
+        },
+        {
+          "concept_en": "Heart",
+          "concept_zh": "心脏",
+          "laterality": "Bilateral",
+          "description": "Not enlarged",
+          "source_sentence": "心脏未见增大"
+        },
+        {
+          "concept_en": "Pericardium",
+          "concept_zh": "心包",
+          "laterality": "Bilateral",
+          "description": "Contains effusion",
+          "source_sentence": "心包少-中量积液"
+        },
+        {
+          "concept_en": "Aortic valve",
+          "concept_zh": "主动脉瓣",
+          "laterality": "Bilateral",
+          "description": "Calcified",
+          "source_sentence": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "concept_en": "Aortic wall",
+          "concept_zh": "主动脉壁",
+          "laterality": "Bilateral",
+          "description": "Calcified",
+          "source_sentence": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "concept_en": "Left pleural space",
+          "concept_zh": "左侧胸腔",
+          "laterality": "Left",
+          "description": "Contains effusion",
+          "source_sentence": "左侧胸腔少量积液"
+        },
+        {
+          "concept_en": "Right 5th anterior rib",
+          "concept_zh": "右侧第5前肋",
+          "laterality": "Right",
+          "description": "Fractured, associated soft tissue mass",
+          "source_sentence": "右侧第5前肋病理性骨折并局部软组织肿块影"
+        },
+        {
+          "concept_en": "Right 2nd/3rd intercostal space",
+          "concept_zh": "右侧第2/3肋间",
+          "laterality": "Right",
+          "description": "Contains soft tissue nodule",
+          "source_sentence": "右侧第2/3肋间见软组织结节影"
+        }
+      ],
+      "diagnoses": [
+        {
+          "diagnosis": "Right hydropneumothorax",
+          "source_sentence": "右侧液气胸"
+        },
+        {
+          "diagnosis": "Right pleural effusion",
+          "source_sentence": "右侧液气胸"
+        },
+        {
+          "diagnosis": "Left pleural effusion",
+          "source_sentence": "左侧胸腔少量积液"
+        },
+        {
+          "diagnosis": "Right lung mass/tumor",
+          "source_sentence": "较大者位于右肺中叶, 直径约1.8cm"
+        },
+        {
+          "diagnosis": "Right lung consolidation",
+          "source_sentence": "右肺中叶及下叶见实变"
+        },
+        {
+          "diagnosis": "Right bronchial stenosis/obstruction",
+          "source_sentence": "右肺中叶内侧段远端支气管狭窄、闭塞"
+        },
+        {
+          "diagnosis": "Right hilar and mediastinal lymphadenopathy",
+          "source_sentence": "右肺门及纵隔淋巴结增大"
+        },
+        {
+          "diagnosis": "Pericardial effusion",
+          "source_sentence": "心包少-中量积液"
+        },
+        {
+          "diagnosis": "Aortic valve calcification",
+          "source_sentence": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "diagnosis": "Aortic wall calcification",
+          "source_sentence": "主动脉瓣及主动脉壁钙化"
+        },
+        {
+          "diagnosis": "Pathologic fracture of right 5th anterior rib",
+          "source_sentence": "右侧第5前肋病理性骨折"
+        },
+        {
+          "diagnosis": "Soft tissue mass adjacent to right 5th anterior rib fracture",
+          "source_sentence": "右侧第5前肋病理性骨折并局部软组织肿块影"
+        },
+        {
+          "diagnosis": "Soft tissue nodule in right 2nd/3rd intercostal space",
+          "source_sentence": "右侧第2/3肋间见软组织结节影"
+        }
+      ]
+    }
+  }
+}
