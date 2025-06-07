@@ -505,49 +505,9 @@ with analysis_col1:
                     st.subheader("影像诊断映射")
                     st.json(data.get("影像诊断映射", []))
 
-# SNOMED CT 优化分析
+# 预留给其他分析功能的区域
 with analysis_col2:
-    if st.button("SNOMED CT 优化分析", key=f"snomed_analyze_{current_idx}", use_container_width=True):
-        with st.spinner("正在使用SNOMED CT提取器分析..."):
-            extractor = st.session_state.structure_extractor
-            # 使用动态字段名获取内容
-            image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
-            diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
-            
-            # 使用SNOMED CT提取器
-            result = extractor.extract_snomed_structure(image_text, diagnosis_text)
-            st.session_state.analyzed_reports[f"report_{current_idx}"] = result
-            st.success("SNOMED CT结构化分析完成！")
-            
-            # 显示SNOMED CT特有的结果
-            if "SNOMED_CT_原始结果" in result:
-                st.markdown("### 🏥 SNOMED CT 分析结果")
-                
-                snomed_result = result["SNOMED_CT_原始结果"]
-                
-                # 显示质量评估
-                if "overall_quality" in snomed_result:
-                    quality = snomed_result["overall_quality"]
-                    st.markdown("#### 📊 质量评估")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric("完整性", quality.get("completeness", "未评估"))
-                    with col2:
-                        st.metric("清晰度", quality.get("clarity", "未评估"))
-                    if quality.get("comment"):
-                        st.info(f"评估意见: {quality['comment']}")
-                
-                # 显示处理信息
-                if "processing_info" in snomed_result:
-                    proc_info = snomed_result["processing_info"]
-                    st.markdown("#### ⏱️ 处理信息")
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("处理时间", f"{proc_info.get('processing_time_seconds', 0):.2f}秒")
-                    with col2:
-                        st.metric("输入长度", f"{proc_info.get('input_length', 0)} 字符")
-                    with col3:
-                        st.metric("使用模型", proc_info.get('model', 'N/A'))
+    st.info("💡 此区域可用于添加其他分析功能")
 
 # ================= KnowledgeForge Integration: Start =================
 with analysis_col3:
