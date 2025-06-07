@@ -10,6 +10,26 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+# ================= KnowledgeForge Integration: Start =================
+# Add project root to the path to allow importing from 06_KnowledgeForge
+import sys
+import os
+# This assumes the script is run from the project root or via streamlit run
+# It navigates up from 'pages' -> 'medical_report_analyzer_02' -> '05_report_anasisys' -> root
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+try:
+    # Corrected import path to reflect the new, valid package name
+    from KnowledgeForge_Project.knowledgeforge import process as knowledgeforge_process
+    KNOWLEDGEFORGE_AVAILABLE = True
+except ImportError as e:
+    # This will now hopefully not be triggered
+    print(f"DEBUG: Failed to import KnowledgeForge: {e}")
+    KNOWLEDGEFORGE_AVAILABLE = False
+# ================= KnowledgeForge Integration: End ===================
+
 # 导入字体管理和配置
 from utils import font_manager
 from utils import plot_utils
@@ -243,6 +263,61 @@ def display_validation_results(original_result, validation_result, issues, corre
         with quality_metrics[2]:
             st.metric("映射关系", f"{len(original_result.get('结构化数据', {}).get('影像诊断映射', []))} 个", "✅ 高质量")
 
+# ================= KnowledgeForge Integration: Start =================
+def display_knowledgeforge_results(kf_result: dict):
+    """专门用于显示KnowledgeForge处理后的结果"""
+    st.markdown("### ✨ KnowledgeForge 深度分析结果")
+    
+    if not kf_result:
+        st.error("KnowledgeForge 返回了空结果。")
+        return
+
+    tabs = st.tabs(["**💎 实体与关系**", "**📄 完整JSON输出**"])
+
+    with tabs[0]:
+        st.markdown("#### 核心实体提取与标准化")
+        
+        findings = kf_result.get("ClinicalFindings", [])
+        diagnoses = kf_result.get("Diagnoses", [])
+
+        if not findings and not diagnoses:
+            st.warning("未提取到临床发现或诊断信息。")
+            return
+
+        for i, entity in enumerate(findings + diagnoses):
+            entity_type = entity.get("EntityType", "未知实体")
+            original_text = entity.get("Finding") or entity.get("Diagnosis")
+            
+            with st.expander(f"**{entity_type} {i+1}: {original_text}**", expanded=True):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown(f"**语义ID**: `{entity.get('semantic_id', 'N/A')}`")
+                    if entity.get("related_finding_ids"):
+                        st.markdown(f"**关联发现ID**:")
+                        for rel_id in entity["related_finding_ids"]:
+                            st.code(rel_id, language='text')
+
+                with col2:
+                    if entity.get("Standardization"):
+                        std = entity["Standardization"]
+                        st.markdown(f"**标准术语**: {std.get('term_en')} / {std.get('term_zh')}")
+                        st.markdown(f"**SNOMED CT ID**: `{std.get('sct_id', 'N/A')}`")
+                        st.markdown(f"**层级路径**: `{std.get('hierarchy_en', 'N/A')}`")
+                
+                if entity.get("AnatomicalLocation") and entity["AnatomicalLocation"].get("Standardization"):
+                    st.markdown("---")
+                    st.markdown("**解剖位置标准化**")
+                    anat_std = entity["AnatomicalLocation"]["Standardization"]
+                    st.markdown(f"**标准术语**: {anat_std.get('term_en')} / {anat_std.get('term_zh')}")
+                    st.markdown(f"**SNOMED CT ID**: `{anat_std.get('sct_id', 'N/A')}`")
+                    st.markdown(f"**层级路径**: `{anat_std.get('hierarchy_en', 'N/A')}`")
+
+
+    with tabs[1]:
+        st.json(kf_result)
+# ================= KnowledgeForge Integration: End ===================
+
 # 初始化结构提取器
 if "structure_extractor" not in st.session_state:
     if st.session_state.get("llm_client") is not None:
@@ -317,111 +392,219 @@ with col1:
 with col2:
     st.text_area(f"{impression_column}", report.get(impression_column, ""), height=120, disabled=True, key=f"diag_{current_idx}")
 
-# 单份分析
-if st.button("分析当前报告", key=f"analyze_{current_idx}"):
-    with st.spinner("正在分析..."):
-        extractor = st.session_state.structure_extractor
-        # 使用动态字段名获取内容
-        image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
-        diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
-        result = extractor.analyze_single_report(image_text, diagnosis_text)
-        st.session_state.analyzed_reports[f"report_{current_idx}"] = result
-        st.success("结构化分析完成！")
-        
-        # 自动进行质量验证
-        st.markdown("---")
-        with st.spinner("正在进行质量验证..."):
-            validator = StructuredResultValidator()
-            is_valid, issues, corrected_result = validator.validate_structured_result(result)
+# 分析按钮区域
+analysis_col1, analysis_col2, analysis_col3 = st.columns([1, 1, 1])
+
+# 单份分析 - 原始流程
+with analysis_col1:
+    if st.button("分析当前报告", key=f"analyze_{current_idx}", use_container_width=True):
+        with st.spinner("正在分析..."):
+            extractor = st.session_state.structure_extractor
+            # 使用动态字段名获取内容
+            image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
+            diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
+            result = extractor.analyze_single_report(image_text, diagnosis_text)
+            st.session_state.analyzed_reports[f"report_{current_idx}"] = result
+            st.success("结构化分析完成！")
             
-            # 显示验证结果的可视化界面
-            display_validation_results(result, is_valid, issues, corrected_result)
-        
-        # 结构化结果分tab显示
-        if "结构化数据" in result:
-            tabs = st.tabs(["解剖结构", "病变特征", "诊断信息", "影像诊断映射"])
-            data = result["结构化数据"]
-            with tabs[0]:
-                st.subheader("解剖结构")
-                st.json(data.get("解剖结构", []))
-                # 可视化
-                if data.get("解剖结构"):
-                    from utils.network_visualizer import create_relationship_graph
-                    structures = data["解剖结构"]
-                    nodes = []
-                    edges = []
-                    for i, struct in enumerate(structures):
-                        if "原文" in struct:
-                            node_id = f"n{i}"
-                            nodes.append({
-                                "id": node_id,
-                                "label": struct["原文"],
-                                "group": 1
-                            })
-                            if "父结构" in struct and struct["父结构"]:
-                                parent_id = None
-                                for j, parent_node in enumerate(nodes):
-                                    if parent_node["label"] == struct["父结构"]:
-                                        parent_id = parent_node["id"]
-                                        break
-                                if parent_id is None:
-                                    parent_id = f"p{i}"
-                                    nodes.append({
-                                        "id": parent_id,
-                                        "label": struct["父结构"],
-                                        "group": 2
-                                    })
-                                edges.append({
-                                    "from": parent_id,
-                                    "to": node_id,
-                                    "label": ""
+            # 自动进行质量验证
+            st.markdown("---")
+            with st.spinner("正在进行质量验证..."):
+                validator = StructuredResultValidator()
+                is_valid, issues, corrected_result = validator.validate_structured_result(result)
+                
+                # 显示验证结果的可视化界面
+                display_validation_results(result, is_valid, issues, corrected_result)
+            
+            # 结构化结果分tab显示
+            if "结构化数据" in result:
+                tabs = st.tabs(["解剖结构", "病变特征", "诊断信息", "影像诊断映射"])
+                data = result["结构化数据"]
+                with tabs[0]:
+                    st.subheader("解剖结构")
+                    st.json(data.get("解剖结构", []))
+                    # 可视化
+                    if data.get("解剖结构"):
+                        from utils.network_visualizer import create_relationship_graph
+                        structures = data["解剖结构"]
+                        nodes = []
+                        edges = []
+                        for i, struct in enumerate(structures):
+                            if "原文" in struct:
+                                node_id = f"n{i}"
+                                nodes.append({
+                                    "id": node_id,
+                                    "label": struct["原文"],
+                                    "group": 1
                                 })
-                    if nodes:
-                        # ==== 强制指定matplotlib中文字体（KISS方案）====
-                        import os
-                        import matplotlib
-                        import matplotlib.pyplot as plt
-                        from matplotlib.font_manager import FontProperties
-                        font_path = "/System/Library/Fonts/Hiragino Sans GB.ttc"
-                        if not os.path.exists(font_path):
-                            font_path = "/System/Library/Fonts/STHeiti Medium.ttc"
-                        if not os.path.exists(font_path):
-                            font_path = "/System/Library/Fonts/STHeiti Light.ttc"
-                        if not os.path.exists(font_path):
-                            font_path = "/System/Library/Fonts/Arial Unicode.ttf"
-                        if not os.path.exists(font_path):
-                            st.error("未检测到可用的中文字体文件，请检查系统字体配置。")
-                            st.stop()
-                        font_prop = FontProperties(fname=font_path)
-                        matplotlib.rcParams['font.sans-serif'] = [font_prop.get_name()]
-                        matplotlib.rcParams['axes.unicode_minus'] = False
-                        # ==== 绘制关系图，label/title自动全局中文支持 ====
-                        import networkx as nx
-                        G = nx.DiGraph()
-                        for node in nodes:
-                            G.add_node(node["id"], label=node["label"], group=node["group"])
-                        for edge in edges:
-                            G.add_edge(edge["from"], edge["to"], label=edge.get("label", ""))
-                        pos = nx.spring_layout(G)
-                        labels = nx.get_node_attributes(G, 'label')
-                        groups = nx.get_node_attributes(G, 'group')
-                        plt.figure(figsize=(8, 6))
-                        nx.draw_networkx_nodes(G, pos, node_color=[groups[n] for n in G.nodes()], cmap=plt.cm.Set1, node_size=800)
-                        nx.draw_networkx_edges(G, pos, arrows=True)
-                        nx.draw_networkx_labels(G, pos, labels, font_size=12)
-                        plt.title("解剖结构关系图")
-                        plt.axis('off')
-                        st.pyplot(plt)
-                        plt.close()
-            with tabs[1]:
-                st.subheader("病变特征")
-                st.json(data.get("病变特征", []))
-            with tabs[2]:
-                st.subheader("诊断信息")
-                st.json(data.get("诊断信息", []))
-            with tabs[3]:
-                st.subheader("影像诊断映射")
-                st.json(data.get("影像诊断映射", []))
+                                if "父结构" in struct and struct["父结构"]:
+                                    parent_id = None
+                                    for j, parent_node in enumerate(nodes):
+                                        if parent_node["label"] == struct["父结构"]:
+                                            parent_id = parent_node["id"]
+                                            break
+                                    if parent_id is None:
+                                        parent_id = f"p{i}"
+                                        nodes.append({
+                                            "id": parent_id,
+                                            "label": struct["父结构"],
+                                            "group": 2
+                                        })
+                                    edges.append({
+                                        "from": parent_id,
+                                        "to": node_id,
+                                        "label": ""
+                                    })
+                        if nodes:
+                            # ==== 强制指定matplotlib中文字体（KISS方案）====
+                            import os
+                            import matplotlib
+                            import matplotlib.pyplot as plt
+                            from matplotlib.font_manager import FontProperties
+                            font_path = "/System/Library/Fonts/Hiragino Sans GB.ttc"
+                            if not os.path.exists(font_path):
+                                font_path = "/System/Library/Fonts/STHeiti Medium.ttc"
+                            if not os.path.exists(font_path):
+                                font_path = "/System/Library/Fonts/STHeiti Light.ttc"
+                            if not os.path.exists(font_path):
+                                font_path = "/System/Library/Fonts/Arial Unicode.ttf"
+                            if not os.path.exists(font_path):
+                                st.error("未检测到可用的中文字体文件，请检查系统字体配置。")
+                                st.stop()
+                            font_prop = FontProperties(fname=font_path)
+                            matplotlib.rcParams['font.sans-serif'] = [font_prop.get_name()]
+                            matplotlib.rcParams['axes.unicode_minus'] = False
+                            # ==== 绘制关系图，label/title自动全局中文支持 ====
+                            import networkx as nx
+                            G = nx.DiGraph()
+                            for node in nodes:
+                                G.add_node(node["id"], label=node["label"], group=node["group"])
+                            for edge in edges:
+                                G.add_edge(edge["from"], edge["to"], label=edge.get("label", ""))
+                            pos = nx.spring_layout(G)
+                            labels = nx.get_node_attributes(G, 'label')
+                            groups = nx.get_node_attributes(G, 'group')
+                            plt.figure(figsize=(8, 6))
+                            nx.draw_networkx_nodes(G, pos, node_color=[groups[n] for n in G.nodes()], cmap=plt.cm.Set1, node_size=800)
+                            nx.draw_networkx_edges(G, pos, arrows=True)
+                            nx.draw_networkx_labels(G, pos, labels, font_size=12)
+                            plt.title("解剖结构关系图")
+                            plt.axis('off')
+                            st.pyplot(plt)
+                            plt.close()
+                with tabs[1]:
+                    st.subheader("病变特征")
+                    st.json(data.get("病变特征", []))
+                with tabs[2]:
+                    st.subheader("诊断信息")
+                    st.json(data.get("诊断信息", []))
+                with tabs[3]:
+                    st.subheader("影像诊断映射")
+                    st.json(data.get("影像诊断映射", []))
+
+# SNOMED CT 优化分析
+with analysis_col2:
+    if st.button("SNOMED CT 优化分析", key=f"snomed_analyze_{current_idx}", use_container_width=True):
+        with st.spinner("正在使用SNOMED CT提取器分析..."):
+            extractor = st.session_state.structure_extractor
+            # 使用动态字段名获取内容
+            image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
+            diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
+            
+            # 使用SNOMED CT提取器
+            result = extractor.extract_snomed_structure(image_text, diagnosis_text)
+            st.session_state.analyzed_reports[f"report_{current_idx}"] = result
+            st.success("SNOMED CT结构化分析完成！")
+            
+            # 显示SNOMED CT特有的结果
+            if "SNOMED_CT_原始结果" in result:
+                st.markdown("### 🏥 SNOMED CT 分析结果")
+                
+                snomed_result = result["SNOMED_CT_原始结果"]
+                
+                # 显示质量评估
+                if "overall_quality" in snomed_result:
+                    quality = snomed_result["overall_quality"]
+                    st.markdown("#### 📊 质量评估")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("完整性", quality.get("completeness", "未评估"))
+                    with col2:
+                        st.metric("清晰度", quality.get("clarity", "未评估"))
+                    if quality.get("comment"):
+                        st.info(f"评估意见: {quality['comment']}")
+                
+                # 显示处理信息
+                if "processing_info" in snomed_result:
+                    proc_info = snomed_result["processing_info"]
+                    st.markdown("#### ⏱️ 处理信息")
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("处理时间", f"{proc_info.get('processing_time_seconds', 0):.2f}秒")
+                    with col2:
+                        st.metric("输入长度", f"{proc_info.get('input_length', 0)} 字符")
+                    with col3:
+                        st.metric("使用模型", proc_info.get('model', 'N/A'))
+
+# ================= KnowledgeForge Integration: Start =================
+with analysis_col3:
+    if KNOWLEDGEFORGE_AVAILABLE:
+        if st.button("使用 KnowledgeForge 深度分析", type="primary", key=f"kf_analyze_{current_idx}", use_container_width=True):
+            st.session_state.kf_result = None # Clear previous results
+            with st.spinner("第一步：执行初步提取..."):
+                extractor = st.session_state.structure_extractor
+                image_text = report.get(findings_column, "") if pd.notna(report.get(findings_column, "")) else ""
+                diagnosis_text = report.get(impression_column, "") if pd.notna(report.get(impression_column, "")) else ""
+                
+                # 1. Get the raw JSON from the original extractor
+                raw_result = extractor.analyze_single_report(image_text, diagnosis_text)
+                st.info("初步提取完成。")
+
+                # --- DEBUG: Display the raw result ---
+                with st.expander("🔍 查看初步提取的原始JSON", expanded=True):
+                    st.json(raw_result)
+                # --- END DEBUG ---
+
+            with st.spinner("第二步：启动 KnowledgeForge 引擎进行验证、丰富和关联..."):
+                # --- ADAPTER: Convert raw_result to KnowledgeForge's expected format ---
+                kf_input = {}
+                structured_data = raw_result.get("结构化数据", {})
+                
+                # We will treat '病变特征' as 'ClinicalFindings' for now.
+                # A more robust solution might involve mapping fields.
+                kf_input["ClinicalFindings"] = structured_data.get("病变特征", [])
+                
+                # Rename '诊断信息' to 'Diagnoses'
+                kf_input["Diagnoses"] = structured_data.get("诊断信息", [])
+
+                # Add other top-level info if needed by KF in the future
+                kf_input["PatientInfo"] = raw_result.get("PatientInfo", {})
+
+                with st.expander("🔧 查看适配后的输入JSON (送入KF)", expanded=False):
+                    st.json(kf_input)
+                # --- END ADAPTER ---
+
+                # 2. Define DB path and process with KnowledgeForge
+                db_path = os.path.join(project_root, "KnowledgeForge_Project", "data", "knowledge.db")
+                if not os.path.exists(db_path):
+                    st.error(f"KnowledgeForge数据库未找到，请先运行 KnowledgeForge_Project/knowledgeforge/db_manager.py 来初始化数据库。路径：{db_path}")
+                else:
+                    # Pass the adapted input to the engine
+                    final_result = knowledgeforge_process(kf_input, db_path)
+                    st.session_state.kf_result = final_result
+                    st.success("KnowledgeForge 深度分析完成！")
+    else:
+        st.warning("KnowledgeForge 模块未找到，深度分析功能不可用。")
+
+# Display KF results if they exist in session state
+if "kf_result" in st.session_state and st.session_state.kf_result:
+    display_knowledgeforge_results(st.session_state.kf_result)
+# ================= KnowledgeForge Integration: End ===================
+
+# 原有的分析结果展示逻辑
+if f"report_{current_idx}" in st.session_state.analyzed_reports and not st.session_state.get("kf_result"):
+    result = st.session_state.analyzed_reports[f"report_{current_idx}"]
+    # ... (existing result display logic) ...
 
 # 批量分析
 if analysis_mode == "批量报告分析":
@@ -472,7 +655,7 @@ if analysis_mode == "批量报告分析":
                             "quality_score": max(0, (10 - len(issues)) / 10 * 100)
                         }
                     else:
-                    st.session_state.analyzed_reports[f"report_{i}"] = result
+                        st.session_state.analyzed_reports[f"report_{i}"] = result
                         st.session_state.analyzed_reports[f"report_{i}"]["validation_info"] = {
                             "issues": [],
                             "quality_score": 100

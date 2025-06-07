@@ -528,7 +528,7 @@ class StructureExtractor:
                         "映射置信度": "高" if feature.get("名称", "") in diagnosis_text else "中"
                     }
                     mappings.append(mapping)
-            # 如果没有找到相关特征，但有诊断，创建一个带“低”置信度的映射
+            # 如果没有找到相关特征，但有诊断，创建一个带"低"置信度的映射
             elif features:
                 mapping = {
                     "影像发现": "综合影像表现",
@@ -547,3 +547,193 @@ class StructureExtractor:
             callback: 回调函数，接受步骤名称和步骤索引
         """
         self.status_callback = callback
+    
+    def extract_snomed_structure(self, report_text: str, diagnosis_text: str = "") -> Dict[str, Any]:
+        """
+        使用优化的SNOMED CT提取器进行结构化分析
+        
+        参数:
+            report_text: 影像表现文本
+            diagnosis_text: 诊断结论文本
+            
+        返回:
+            SNOMED CT结构化数据
+        """
+        logger.info("开始使用SNOMED CT提取器进行结构化分析")
+        
+        try:
+            # 导入SNOMED CT提取器
+            from .snomed_ct_extractor import SnomedCTExtractor
+            
+            # 配置SNOMED CT提取器
+            config = {
+                "model": self.llm_client.model if hasattr(self.llm_client, 'model') else "medgemma:latest",
+                "api_base": getattr(self.llm_client, 'api_base', "http://localhost:11434"),
+                "temperature": 0.1,
+                "num_predict": 2048,  # 解决JSON截断问题
+                "keep_alive": "5m",   # 解决模型重载延迟
+                "timeout": 300
+            }
+            
+            # 创建SNOMED CT提取器实例
+            snomed_extractor = SnomedCTExtractor(config)
+            
+            # 执行SNOMED CT结构化提取
+            snomed_result = snomed_extractor.extract_structured_report(report_text, diagnosis_text)
+            
+            # 转换为兼容格式
+            converted_result = self._convert_snomed_to_standard_format(snomed_result)
+            
+            logger.info("SNOMED CT结构化分析完成")
+            return converted_result
+            
+        except ImportError as e:
+            logger.error(f"无法导入SNOMED CT提取器: {str(e)}")
+            # 回退到原有方法
+            return self.extract_report_structure(report_text, diagnosis_text)
+        except Exception as e:
+            logger.error(f"SNOMED CT结构化分析失败: {str(e)}")
+            # 回退到原有方法
+            return self.extract_report_structure(report_text, diagnosis_text)
+    
+    def _convert_snomed_to_standard_format(self, snomed_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        将SNOMED CT结果转换为标准格式
+        
+        参数:
+            snomed_result: SNOMED CT提取结果
+            
+        返回:
+            标准格式的结构化数据
+        """
+        # 如果有错误，返回错误信息
+        if "error" in snomed_result:
+            return {
+                "解剖结构": [],
+                "病变特征": [],
+                "诊断信息": [],
+                "映射关系": [],
+                "分析错误": snomed_result["error"],
+                "处理时间": snomed_result.get("processing_info", {}).get("processing_time_seconds", 0)
+            }
+        
+        # 转换解剖结构
+        anatomical_structures = []
+        for structure in snomed_result.get("body_structures", []):
+            anatomical_structures.append({
+                "原文": structure.get("source_sentence", ""),
+                "标准名": structure.get("concept_zh", ""),
+                "英文名": structure.get("concept_en", ""),
+                "父结构": "",  # SNOMED CT结果中可能没有直接的父结构信息
+                "侧性": structure.get("laterality", ""),
+                "描述": structure.get("description", "")
+            })
+        
+        # 转换病变特征
+        lesion_features = []
+        for finding in snomed_result.get("clinical_findings", []):
+            relationships = finding.get("relationships", {})
+            lesion_features.append({
+                "名称": finding.get("concept_zh", ""),
+                "英文名": finding.get("concept_en", ""),
+                "特征": {
+                    "解剖位置": relationships.get("finding_site", ""),
+                    "病变形态": relationships.get("associated_morphology", ""),
+                    "侧性": relationships.get("laterality", ""),
+                    "严重程度": relationships.get("severity", ""),
+                    "测量值": relationships.get("has_measurement", "")
+                },
+                "原文": finding.get("source_sentence", "")
+            })
+        
+        # 转换诊断信息
+        diagnosis_info = []
+        for diagnosis in snomed_result.get("diagnoses", []):
+            relationships = diagnosis.get("relationships", {})
+            diagnosis_info.append({
+                "类型": "SNOMED CT诊断",
+                "描述": diagnosis.get("concept_zh", ""),
+                "英文描述": diagnosis.get("concept_en", ""),
+                "关系": {
+                    "解剖位置": relationships.get("finding_site", ""),
+                    "病变形态": relationships.get("associated_morphology", ""),
+                    "侧性": relationships.get("laterality", ""),
+                    "严重程度": relationships.get("severity", "")
+                },
+                "原文": diagnosis.get("source_sentence", "")
+            })
+        
+        # 生成映射关系
+        mappings = self._generate_snomed_mappings(lesion_features, diagnosis_info)
+        
+        # 组织返回结果
+        result = {
+            "解剖结构": anatomical_structures,
+            "病变特征": lesion_features,
+            "诊断信息": diagnosis_info,
+            "映射关系": mappings,
+            "SNOMED_CT_原始结果": snomed_result,
+            "处理时间": f"{snomed_result.get('processing_info', {}).get('processing_time_seconds', 0):.2f}秒",
+            "质量评估": snomed_result.get("overall_quality", {})
+        }
+        
+        return result
+    
+    def _generate_snomed_mappings(self, features: List[Dict[str, Any]], diagnoses: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+        """
+        基于SNOMED CT结果生成映射关系
+        
+        参数:
+            features: 病变特征列表
+            diagnoses: 诊断信息列表
+            
+        返回:
+            映射关系列表
+        """
+        mappings = []
+        
+        # 如果没有特征或诊断，返回空列表
+        if not features or not diagnoses:
+            return mappings
+        
+        # 为每个诊断找到相关的特征
+        for diagnosis in diagnoses:
+            diagnosis_text = diagnosis.get("描述", "")
+            diagnosis_location = diagnosis.get("关系", {}).get("解剖位置", "")
+            
+            # 找到相关的特征
+            related_features = []
+            for feature in features:
+                feature_location = feature.get("特征", {}).get("解剖位置", "")
+                feature_name = feature.get("名称", "")
+                
+                # 基于解剖位置或特征名称匹配
+                if (diagnosis_location and feature_location and 
+                    diagnosis_location in feature_location or feature_location in diagnosis_location):
+                    related_features.append(feature)
+                elif feature_name and feature_name in diagnosis_text:
+                    related_features.append(feature)
+            
+            # 创建映射
+            if related_features:
+                for feature in related_features:
+                    mapping = {
+                        "影像发现": feature.get("名称", ""),
+                        "对应诊断": diagnosis_text,
+                        "映射置信度": "高",
+                        "SNOMED_CT_关联": True,
+                        "解剖位置": feature.get("特征", {}).get("解剖位置", "")
+                    }
+                    mappings.append(mapping)
+            else:
+                # 如果没有找到直接关联，创建一个通用映射
+                mapping = {
+                    "影像发现": "综合SNOMED CT发现",
+                    "对应诊断": diagnosis_text,
+                    "映射置信度": "中",
+                    "SNOMED_CT_关联": True,
+                    "解剖位置": diagnosis_location
+                }
+                mappings.append(mapping)
+        
+        return mappings
