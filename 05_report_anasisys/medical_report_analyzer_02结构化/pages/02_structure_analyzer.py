@@ -527,13 +527,29 @@ with analysis_col3:
                     st.error(f"KnowledgeForge数据库未找到，路径：{db_path}")
                 else:
                     try:
-                        # 直接分析医学报告
-                        snomed_result = analyze_medical_report_with_snomed(
+                        # 创建进度条和状态显示
+                        progress_bar = st.progress(0)
+                        status_container = st.empty()
+                        
+                        def update_progress(message: str, percentage: int):
+                            """进度回调函数"""
+                            progress_bar.progress(percentage / 100)
+                            status_container.info(f"⏳ {message}")
+                        
+                        # 使用带进度回调的分析器
+                        from knowledgeforge.snomed_report_analyzer import SNOMEDReportAnalyzer
+                        analyzer = SNOMEDReportAnalyzer(db_path, progress_callback=update_progress)
+                        
+                        # 分析医学报告
+                        snomed_result = analyzer.analyze_medical_report(
                             findings_text=image_text,
                             diagnosis_text=diagnosis_text,
-                            db_path=db_path,
                             patient_info={"report_id": current_idx}
                         )
+                        
+                        # 清理进度显示
+                        progress_bar.empty()
+                        status_container.empty()
                         
                         st.session_state.snomed_result = snomed_result
                         
@@ -542,18 +558,51 @@ with analysis_col3:
                             quality = snomed_result.get("quality_assessment", {})
                             col1, col2, col3, col4 = st.columns(4)
                             
-                            with col1:
-                                st.metric("实体数量", quality.get("entity_count", 0))
-                            with col2:
-                                st.metric("关系数量", quality.get("relationship_count", 0))
-                            with col3:
-                                st.metric("质量分数", f"{quality.get('overall_score', 0):.2f}")
-                            with col4:
-                                st.metric("处理时间", f"{snomed_result.get('processing_time', 0):.1f}秒")
+                            entity_count = quality.get("entity_count", 0)
+                            relationship_count = quality.get("relationship_count", 0)
+                            overall_score = quality.get("overall_score", 0)
+                            processing_time = snomed_result.get("processing_time", 0)
                             
-                            st.success("✅ SNOMED CT智能分析完成！")
+                            with col1:
+                                st.metric("实体数量", entity_count)
+                            with col2:
+                                st.metric("关系数量", relationship_count)
+                            with col3:
+                                st.metric("质量分数", f"{overall_score:.2f}")
+                            with col4:
+                                st.metric("处理时间", f"{processing_time:.1f}秒")
+                            
+                            # 根据结果显示不同的消息
+                            if entity_count == 0 and relationship_count == 0:
+                                st.warning("⚠️ 分析完成，但未提取到实体或关系。这可能是由于：\n"
+                                         "- 文本内容过于简单或不明确\n"
+                                         "- LLM模型理解困难\n"
+                                         "- 网络连接问题\n\n"
+                                         "建议：检查输入文本是否完整，或重新尝试分析。")
+                            else:
+                                st.success("✅ SNOMED CT智能分析完成！")
                         else:
-                            st.error(f"❌ 分析失败：{snomed_result.get('error', '未知错误')}")
+                            # 显示详细错误信息
+                            error_msg = snomed_result.get('error', '未知错误')
+                            llm_error = snomed_result.get('llm_raw_output', {}).get('error', '')
+                            
+                            st.error(f"❌ 分析失败：{error_msg}")
+                            
+                            if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
+                                st.info("💡 **超时问题解决建议：**\n"
+                                       "1. 检查Ollama服务是否正常运行\n"
+                                       "2. 尝试重启Ollama服务\n"
+                                       "3. 简化输入文本长度\n"
+                                       "4. 等待片刻后重试")
+                            elif "connection" in error_msg.lower():
+                                st.info("💡 **连接问题解决建议：**\n"
+                                       "1. 确保Ollama正在运行：`ollama serve`\n"
+                                       "2. 检查端口11434是否被占用\n"
+                                       "3. 重启Ollama服务")
+                            
+                            if llm_error:
+                                with st.expander("🔍 查看详细错误信息"):
+                                    st.code(llm_error)
                             
                     except Exception as e:
                         st.error(f"❌ SNOMED CT分析出错：{str(e)}")
