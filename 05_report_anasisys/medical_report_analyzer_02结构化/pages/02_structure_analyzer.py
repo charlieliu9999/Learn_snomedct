@@ -472,7 +472,7 @@ if analysis_mode == "批量报告分析":
                             "quality_score": max(0, (10 - len(issues)) / 10 * 100)
                         }
                     else:
-                        st.session_state.analyzed_reports[f"report_{i}"] = result
+                    st.session_state.analyzed_reports[f"report_{i}"] = result
                         st.session_state.analyzed_reports[f"report_{i}"]["validation_info"] = {
                             "issues": [],
                             "quality_score": 100

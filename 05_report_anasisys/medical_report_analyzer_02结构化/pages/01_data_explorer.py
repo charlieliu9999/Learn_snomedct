@@ -176,8 +176,8 @@ elif data_source == "本地数据文件":
                     st.sidebar.info(f"正在读取上传的文件: {uploaded_file.name}")
                     # uploaded_file 是一个内存中的类文件对象，pandas可以直接读取
                     df = pd.read_excel(uploaded_file) 
-                    st.session_state.raw_data = df
-                    st.session_state.data_loaded = True
+                        st.session_state.raw_data = df
+                        st.session_state.data_loaded = True
                     st.session_state.processed_data = None # 清除旧的处理数据
                     st.session_state.findings_col = None # Reset for auto-detection
                     st.session_state.impression_col = None # Reset for auto-detection
