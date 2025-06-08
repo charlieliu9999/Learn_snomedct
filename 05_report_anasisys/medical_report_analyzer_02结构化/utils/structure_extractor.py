@@ -6,6 +6,7 @@ import logging
 import time
 import json
 import hashlib
+import os
 from typing import Dict, List, Any, Optional, Callable
 
 from .llm_client import LLMClient
@@ -36,67 +37,131 @@ class StructureExtractor:
         # 默认报告类型
         self.report_type = "default"
 
-    def analyze_single_report(self, report_text: str, diagnosis_text: str = "") -> Dict[str, Any]:
+    def _load_decomposition_prompt(self) -> str:
+        """加载语义分解提示词"""
+        try:
+            # 路径逻辑与之前相同，确保能找到文件
+            current_dir = os.path.dirname(__file__)
+            # 此处需要根据您的项目实际结构进行调整，以确保能正确找到KnowledgeForge_Project
+            prompt_path = os.path.join(current_dir, '..', '..', '..', '..', 'KnowledgeForge_Project', 'medical_report_prompt.md')
+            if not os.path.exists(prompt_path):
+                 # 备用路径，以防万一
+                 prompt_path = os.path.join(current_dir, '..', '..', '..', 'KnowledgeForge_Project', 'medical_report_prompt.md')
+
+            with open(prompt_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            logger.error(f"加载语义分解提示词失败: {e}")
+            raise IOError("无法加载必要的提示词文件，系统无法继续。") from e
+
+    def extract_atomic_facts(self, report_text: str, diagnosis_text: str = "") -> Dict[str, Any]:
         """
-        分析单份医学影像报告
+        使用"语义分解"提示词，从报告中提取扁平化的"原子事实"列表。
         
         参数:
             report_text: 影像表现文本
             diagnosis_text: 诊断结论文本
             
         返回:
-            包含结构化数据和分析信息的字典
+            包含"原子事实"和它们之间关系的原始LLM输出字典。
         """
-        logger.info(f"开始分析单份报告：{report_text[:30]}...，诊断：{diagnosis_text[:30]}...")
+        start_time = time.time()
+        
+        full_report = f"影像所见：\n{report_text}\n\n诊断：\n{diagnosis_text}"
+        
+        # 1. 加载分解提示词
+        prompt_template = self._load_decomposition_prompt()
+            
+        # 2. 填充报告文本
+        prompt = prompt_template.replace("{{REPORT_TEXT}}", full_report)
+        
+        self.debug_info["decomposition_prompt"] = prompt
         
         try:
-            # 提取结构化数据
-            logger.info("调用extract_report_structure开始提取结构化数据")
-            structured_data = self.extract_report_structure(report_text, diagnosis_text)
-            logger.info(f"extract_report_structure返回结果类型: {type(structured_data)}")
+            # 3. 调用LLM进行分解
+            logger.info("调用LLM进行语义分解...")
+            llm_result = self.llm_client.extract_json(prompt)
+            logger.info("LLM语义分解成功。")
+
+            # 4. 直接返回原始结果，不进行任何处理
+            end_time = time.time()
+            llm_result['processing_time_seconds'] = f"{end_time - start_time:.2f}"
+            llm_result['debug_info'] = {"decomposition_prompt": prompt}
             
-            # 组织返回结果
+            return llm_result
+            
+        except Exception as e:
+            logger.error(f"语义分解过程中出错: {str(e)}")
+            # 抛出异常，让上层调用者知道处理失败
+            raise RuntimeError(f"LLM semantic decomposition failed: {e}") from e
+
+    def analyze_single_report(self, report_text: str, diagnosis_text: str = "") -> Dict[str, Any]:
+        """
+        分析单份医学报告，提取结构化信息
+        
+        参数:
+            report_text: 影像表现文本
+            diagnosis_text: 诊断结论文本
+            
+        返回:
+            结构化分析结果
+        """
+        logger.info("开始分析单份报告")
+        start_time = time.time()
+        
+        try:
+            # 使用extract_report_structure方法进行完整的结构化分析
+            structure_result = self.extract_report_structure(report_text, diagnosis_text)
+            
+            # 构建兼容的返回格式
             result = {
                 "结构化数据": {
-                    "解剖结构": structured_data.get("解剖结构", []),
-                    "病变特征": structured_data.get("病变特征", []),
-                    "诊断信息": structured_data.get("诊断信息", []),
-                    "影像诊断映射": structured_data.get("映射关系", [])
+                    "解剖结构": structure_result.get("解剖结构", []),
+                    "病变特征": structure_result.get("病变特征", []),
+                    "诊断信息": structure_result.get("诊断信息", []),
+                    "影像诊断映射": structure_result.get("映射关系", [])
                 },
                 "原始文本": {
                     "影像表现": report_text,
                     "诊断结论": diagnosis_text
                 },
                 "分析信息": {
-                    "处理时间": structured_data.get("处理时间", ""),
-                    "处理状态": "成功"
-                }
+                    "处理状态": "成功",
+                    "处理时间": structure_result.get("处理时间", f"{time.time() - start_time:.2f}秒"),
+                    "解剖结构数量": len(structure_result.get("解剖结构", [])),
+                    "病变特征数量": len(structure_result.get("病变特征", [])),
+                    "诊断信息数量": len(structure_result.get("诊断信息", [])),
+                    "映射关系数量": len(structure_result.get("映射关系", []))
+                },
+                "调试信息": structure_result.get("调试信息", {})
             }
             
-            # 如果有调试信息，添加到结果中
-            if "调试信息" in structured_data:
-                result["调试信息"] = structured_data["调试信息"]
-                
-            logger.info(f"单份报告分析完成，结果: {result.keys()}")
-            # 打印更详细的结果信息
-            logger.info(f"解剖结构数量: {len(result['结构化数据']['解剖结构'])}")
-            logger.info(f"病变特征数量: {len(result['结构化数据']['病变特征'])}")
-            logger.info(f"诊断信息数量: {len(result['结构化数据']['诊断信息'])}")
-            logger.info(f"影像诊断映射数量: {len(result['结构化数据']['影像诊断映射'])}")
+            # 如果有错误信息，添加到分析信息中
+            if "错误信息" in structure_result:
+                result["分析信息"]["错误信息"] = structure_result["错误信息"]
+                result["分析信息"]["处理状态"] = "部分成功"
+            
+            logger.info(f"报告分析完成，耗时: {result['分析信息']['处理时间']}")
             return result
             
         except Exception as e:
-            logger.error(f"单份报告分析失败: {str(e)}")
-            # 返回错误信息
+            logger.error(f"报告分析失败: {str(e)}")
             return {
+                "结构化数据": {
+                    "解剖结构": [],
+                    "病变特征": [],
+                    "诊断信息": [],
+                    "影像诊断映射": []
+                },
                 "原始文本": {
                     "影像表现": report_text,
                     "诊断结论": diagnosis_text
                 },
                 "分析信息": {
-                    "处理状态": "失败"
-                },
-                "分析错误": str(e)
+                    "处理状态": "失败",
+                    "错误信息": str(e),
+                    "处理时间": f"{time.time() - start_time:.2f}秒"
+                }
             }
 
     def detect_report_type(self, report_text: str) -> str:
